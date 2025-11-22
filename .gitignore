@@ -1,3 +1,12 @@
+# Android Studio .gitignore for MAD-Group-Project
+# This file determines which files Git will track (commit) vs ignore.
+# 
+# IMPORTANT: Essential project files (.iml, some .idea/ files, gradle wrapper) 
+# are NOT ignored so they can be shared with the team.
+# Build outputs and user-specific settings ARE ignored.
+#
+# If you pushed files but they don't show up, check CONTRIBUTING.md
+
 # Built application files
 *.apk
 *.aar
