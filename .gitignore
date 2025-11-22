@@ -17,9 +17,12 @@ out/
 #  Uncomment the following line in case you need and you don't have the release build type files in your app
 # release/
 
-# Gradle files
+# Gradle files - Allow wrapper files to be committed
 .gradle/
 build/
+# Allow gradle wrapper to be committed (needed for builds)
+!gradle/wrapper/gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.properties
 
 # Local configuration file (sdk path, etc)
 local.properties
@@ -36,17 +39,17 @@ proguard/
 # Android Studio captures folder
 captures/
 
-# IntelliJ
-*.iml
+# IntelliJ - Keep essential project files, ignore user-specific and generated files
+# *.iml - Commented out to allow project structure files
 .idea/workspace.xml
 .idea/tasks.xml
-.idea/gradle.xml
+# .idea/gradle.xml - Commented out to allow gradle configuration
 .idea/assetWizardSettings.xml
 .idea/dictionaries
 .idea/libraries
 # Android Studio 3 in .gitignore file.
 .idea/caches
-.idea/modules.xml
+# .idea/modules.xml - Commented out to allow module configuration
 # Comment next line if keeping position of elements in Navigation Editor is relevant for you
 .idea/navEditor.xml
 
@@ -144,12 +147,12 @@ $RECYCLE.BIN/
 .idea/**/uiDesigner.xml
 .idea/**/dbnavigator.xml
 
-# Gradle
+# Gradle - Allow wrapper and build files needed for the project
 .gradle
 /local.properties
 /.idea/caches
 /.idea/libraries
-/.idea/modules.xml
+# /.idea/modules.xml - Commented out to allow module configuration
 /.idea/workspace.xml
 /.idea/navEditor.xml
 /.idea/assetWizardSettings.xml
@@ -159,3 +162,6 @@ $RECYCLE.BIN/
 .externalNativeBuild
 .cxx
 local.properties
+# Allow gradle wrapper to be committed
+!gradle/wrapper/gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.properties
