@@ -77,7 +77,7 @@ When setting up the Android project for the first time:
 
 After pushing, verify your files appear on GitHub:
 
-1. Go to https://github.com/Warren-530/MAD-Group-Project
+1. Go to your project's GitHub repository page
 2. Check that you see your project folders (`app/`, `gradle/`, etc.)
 3. If files are missing, follow the "I pushed files but they don't show up" steps above
 

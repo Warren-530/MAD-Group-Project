@@ -155,22 +155,3 @@ $RECYCLE.BIN/
 .idea/**/dynamic.xml
 .idea/**/uiDesigner.xml
 .idea/**/dbnavigator.xml
-
-# Gradle - Allow wrapper and build files needed for the project
-.gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-# /.idea/modules.xml - Commented out to allow module configuration
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-.DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
-local.properties
-# Allow gradle wrapper to be committed
-!gradle/wrapper/gradle-wrapper.jar
-!gradle/wrapper/gradle-wrapper.properties
