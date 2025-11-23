@@ -1,14 +1,12 @@
 package com.example.umeventplanner.adapters;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.umeventplanner.R;
@@ -38,17 +36,6 @@ public class GuestAdapter extends RecyclerView.Adapter<GuestAdapter.GuestViewHol
         Map<String, Object> guest = guestList.get(position);
         holder.tvGuestName.setText((String) guest.get("userName"));
         holder.tvGuestEmail.setText((String) guest.get("userEmail"));
-
-        String status = (String) guest.get("status");
-        if ("Attended".equalsIgnoreCase(status)) {
-            holder.tvStatus.setText("Present");
-            holder.tvStatus.setTextColor(ContextCompat.getColor(context, R.color.green_primary));
-            holder.tvStatus.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_check_circle, 0, 0, 0);
-        } else {
-            holder.tvStatus.setText("Registered");
-            holder.tvStatus.setTextColor(Color.GRAY);
-            holder.tvStatus.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
-        }
     }
 
     @Override
@@ -57,13 +44,12 @@ public class GuestAdapter extends RecyclerView.Adapter<GuestAdapter.GuestViewHol
     }
 
     public static class GuestViewHolder extends RecyclerView.ViewHolder {
-        TextView tvGuestName, tvGuestEmail, tvStatus;
+        TextView tvGuestName, tvGuestEmail;
 
         public GuestViewHolder(@NonNull View itemView) {
             super(itemView);
             tvGuestName = itemView.findViewById(R.id.tvGuestName);
             tvGuestEmail = itemView.findViewById(R.id.tvGuestEmail);
-            tvStatus = itemView.findViewById(R.id.tvStatus);
         }
     }
 }
