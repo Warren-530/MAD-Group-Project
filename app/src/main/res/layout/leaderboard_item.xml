@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginStart="8dp"
-    android.layout_marginTop="4dp"
+    android:layout_marginTop="4dp"
     android:layout_marginEnd="8dp"
     android:layout_marginBottom="4dp"
     app:cardCornerRadius="12dp"
@@ -28,10 +28,10 @@
             tools:text="1" />
 
         <androidx.cardview.widget.CardView
-            android:id="@+id/cvBannerContainer"
+            android:id="@+id/cvImageContainer"
             android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:layout_marginStart="16dp"
+            android:layout_height="60dp"
+            android:layout_marginStart="12dp"
             app:cardCornerRadius="8dp"
             app:cardElevation="0dp"
             app:layout_constraintStart_toEndOf="@id/tvRank"
@@ -54,8 +54,8 @@
             android:maxLines="1"
             android:ellipsize="end"
             android:textStyle="bold"
-            app:layout_constraintStart_toEndOf="@id/cvBannerContainer"
-            app:layout_constraintTop_toTopOf="@id/cvBannerContainer"
+            app:layout_constraintStart_toEndOf="@id/cvImageContainer"
+            app:layout_constraintTop_toTopOf="@id/cvImageContainer"
             app:layout_constraintEnd_toStartOf="@id/tvFinalScore"
             tools:text="Event Title Goes Here" />
 
@@ -65,7 +65,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:textColor="@android:color/darker_gray"
-            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+            android:textSize="12sp"
             app:layout_constraintStart_toStartOf="@id/tvEventName"
             app:layout_constraintTop_toBottomOf="@id/tvEventName"
             app:layout_constraintEnd_toEndOf="@id/tvEventName"
