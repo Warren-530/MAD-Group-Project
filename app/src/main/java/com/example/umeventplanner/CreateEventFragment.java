@@ -38,6 +38,8 @@ import com.cloudinary.android.MediaManager;
 import com.cloudinary.android.callback.ErrorInfo;
 import com.cloudinary.android.callback.UploadCallback;
 import com.example.umeventplanner.adapters.SelectedPosterAdapter;
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -62,6 +64,7 @@ public class CreateEventFragment extends Fragment implements SelectedPosterAdapt
     private RatingBar rbScore;
     private ProgressBar progressBar;
     private RecyclerView rvPosterPreviews;
+    private ChipGroup cgCategories;
 
     // Data
     private final List<String> collaboratorIds = new ArrayList<>();
@@ -136,6 +139,7 @@ public class CreateEventFragment extends Fragment implements SelectedPosterAdapt
         tvScoreLabel = view.findViewById(R.id.tvScoreLabel);
         progressBar = view.findViewById(R.id.progressBar);
         btnPublish = view.findViewById(R.id.btnPublish);
+        cgCategories = view.findViewById(R.id.cgCategories);
 
         adapter = new SelectedPosterAdapter(getContext(), posterUris, this);
         rvPosterPreviews.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
@@ -157,6 +161,22 @@ public class CreateEventFragment extends Fragment implements SelectedPosterAdapt
         btnSelectPosters.setOnClickListener(v -> openGalleryFor("poster"));
         btnAddCollaborator.setOnClickListener(v -> addCollaborator());
         btnPublish.setOnClickListener(v -> handlePublish());
+        cgCategories.setOnCheckedStateChangeListener((group, checkedIds) -> {
+            if (checkedIds.size() > 3) {
+                // This logic is simplified for clarity, assuming we can get the last checked chip.
+                // A more robust solution might involve tracking the last checked chip in a separate variable.
+                for (int i = 0; i < group.getChildCount(); i++) {
+                    Chip chip = (Chip) group.getChildAt(i);
+                    if (checkedIds.contains(chip.getId()) && chip.isChecked()) {
+                        List<Integer> checked = group.getCheckedChipIds();
+                        if(checked.size() > 3) {
+                           chip.setChecked(false);
+                        }
+                    }
+                }
+                Toast.makeText(getContext(), "Maximum 3 categories allowed", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void showDatePicker() {
@@ -207,32 +227,42 @@ public class CreateEventFragment extends Fragment implements SelectedPosterAdapt
     }
 
     private void handlePublish() {
+        List<String> selectedCategories = getSelectedCategories();
         if (TextUtils.isEmpty(etEventTitle.getText())) {
             Toast.makeText(getContext(), "Title is required.", Toast.LENGTH_SHORT).show();
             return;
         }
+        if (selectedCategories.isEmpty()) {
+            Toast.makeText(getContext(), "Please select at least one category.", Toast.LENGTH_SHORT).show();
+            return;
+        }
         setLoading(true);
-        uploadBannerImage();
+        uploadBannerImage(selectedCategories);
     }
 
-    private void uploadBannerImage() {
+    private List<String> getSelectedCategories() {
+        List<String> selectedCategories = new ArrayList<>();
+        for (int id : cgCategories.getCheckedChipIds()) {
+            Chip chip = cgCategories.findViewById(id);
+            selectedCategories.add(chip.getText().toString());
+        }
+        return selectedCategories;
+    }
+
+    private void uploadBannerImage(List<String> selectedCategories) {
         if (bannerUri == null) {
-            Log.d(TAG, "No banner image. Proceeding with posters.");
-            uploadPosterImages(null);
+            uploadPosterImages(null, selectedCategories);
             return;
         }
 
-        Log.d(TAG, "Uploading banner to Cloudinary...");
         MediaManager.get().upload(bannerUri).unsigned("MAD Assignment").callback(new UploadCallback() {
             @Override
             public void onSuccess(String requestId, Map resultData) {
                 String bannerUrl = (String) resultData.get("secure_url");
-                Log.d(TAG, "Banner uploaded. URL: " + bannerUrl);
-                uploadPosterImages(bannerUrl);
+                uploadPosterImages(bannerUrl, selectedCategories);
             }
             @Override
             public void onError(String requestId, ErrorInfo error) {
-                Log.e(TAG, "Banner upload failed: " + error.getDescription());
                 Toast.makeText(getContext(), "Banner upload failed.", Toast.LENGTH_SHORT).show();
                 setLoading(false);
             }
@@ -242,10 +272,9 @@ public class CreateEventFragment extends Fragment implements SelectedPosterAdapt
         }).dispatch();
     }
 
-    private void uploadPosterImages(String bannerUrl) {
+    private void uploadPosterImages(String bannerUrl, List<String> selectedCategories) {
         if (posterUris.isEmpty()) {
-            Log.d(TAG, "No posters to upload. Saving to Firestore.");
-            saveEventToFirestore(bannerUrl, new ArrayList<>());
+            saveEventToFirestore(bannerUrl, new ArrayList<>(), selectedCategories);
             return;
         }
 
@@ -262,8 +291,7 @@ public class CreateEventFragment extends Fragment implements SelectedPosterAdapt
                 }
                 @Override
                 public void onError(String requestId, ErrorInfo error) {
-                    Log.e(TAG, "A poster upload failed: " + error.getDescription());
-                    latch.countDown(); // Still countdown to not block forever
+                    latch.countDown();
                 }
                 @Override public void onStart(String requestId) { }
                 @Override public void onProgress(String requestId, long bytes, long totalBytes) { }
@@ -273,12 +301,11 @@ public class CreateEventFragment extends Fragment implements SelectedPosterAdapt
 
         new Thread(() -> {
             try {
-                latch.await(); // Wait for all uploads to finish
+                latch.await();
                 if(getActivity() != null) {
                     getActivity().runOnUiThread(() -> {
                         if (uploadedPosterUrls.size() == posterUris.size()) {
-                            Log.d(TAG, "All posters uploaded. Saving to Firestore.");
-                            saveEventToFirestore(bannerUrl, uploadedPosterUrls);
+                            saveEventToFirestore(bannerUrl, uploadedPosterUrls, selectedCategories);
                         } else {
                             Toast.makeText(getContext(), "One or more posters failed to upload.", Toast.LENGTH_SHORT).show();
                             setLoading(false);
@@ -291,9 +318,8 @@ public class CreateEventFragment extends Fragment implements SelectedPosterAdapt
         }).start();
     }
 
-    private void saveEventToFirestore(String bannerUrl, List<String> posterUrls) {
+    private void saveEventToFirestore(String bannerUrl, List<String> posterUrls, List<String> selectedCategories) {
         final String eventId = UUID.randomUUID().toString();
-        Log.d(TAG, "Saving event to Firestore with eventId: " + eventId);
 
         Map<String, Object> eventData = new HashMap<>();
         eventData.put("title", etEventTitle.getText().toString());
@@ -306,6 +332,8 @@ public class CreateEventFragment extends Fragment implements SelectedPosterAdapt
         eventData.put("bannerUrl", bannerUrl);
         eventData.put("posterUrls", posterUrls);
         eventData.put("sustainabilityScore", rbScore.getRating());
+        eventData.put("categories", selectedCategories);
+        
         Map<String, Boolean> checklist = new HashMap<>();
         for (int id : CHECKBOX_IDS) {
             CheckBox cb = getView().findViewById(id);
@@ -315,6 +343,7 @@ public class CreateEventFragment extends Fragment implements SelectedPosterAdapt
         }
         eventData.put("checklist", checklist);
         eventData.put("status", "Published");
+
         List<String> plannerUIDs = new ArrayList<>(collaboratorIds);
         plannerUIDs.add(FirebaseAuth.getInstance().getCurrentUser().getUid());
         eventData.put("plannerUIDs", plannerUIDs);
@@ -322,15 +351,12 @@ public class CreateEventFragment extends Fragment implements SelectedPosterAdapt
 
         FirebaseFirestore.getInstance().collection("events").document(eventId).set(eventData)
                 .addOnSuccessListener(aVoid -> {
-                    Log.d(TAG, "Event successfully saved!");
                     Toast.makeText(getContext(), "Event Published!", Toast.LENGTH_SHORT).show();
-                    setLoading(false);
                     if (getParentFragmentManager() != null) {
                         getParentFragmentManager().popBackStack();
                     }
                 })
                 .addOnFailureListener(e -> {
-                    Log.e(TAG, "Failed to save event to Firestore.", e);
                     Toast.makeText(getContext(), "Error saving event: " + e.getMessage(), Toast.LENGTH_LONG).show();
                     setLoading(false);
                 });

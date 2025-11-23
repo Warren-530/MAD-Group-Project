@@ -24,12 +24,14 @@ public class Event implements Serializable {
     private String status;
     private List<String> plannerUIDs;
     private Timestamp createdAt;
+    private List<String> categories; // New field
 
     public Event() {
         // Default constructor for Firestore
         this.posterUrls = new ArrayList<>();
         this.plannerUIDs = new ArrayList<>();
         this.checklist = new HashMap<>();
+        this.categories = new ArrayList<>(); // Initialize new field
     }
 
     // Getters
@@ -48,6 +50,7 @@ public class Event implements Serializable {
     public String getStatus() { return status; }
     public List<String> getPlannerUIDs() { return plannerUIDs; }
     public Timestamp getCreatedAt() { return createdAt; }
+    public List<String> getCategories() { return categories; } // Getter for new field
 
     // Setters
     public void setEventId(String eventId) { this.eventId = eventId; }
@@ -65,4 +68,5 @@ public class Event implements Serializable {
     public void setStatus(String status) { this.status = status; }
     public void setPlannerUIDs(List<String> plannerUIDs) { this.plannerUIDs = plannerUIDs; }
     public void setCreatedAt(Timestamp createdAt) { this.createdAt = createdAt; }
+    public void setCategories(List<String> categories) { this.categories = categories; } // Setter for new field
 }
