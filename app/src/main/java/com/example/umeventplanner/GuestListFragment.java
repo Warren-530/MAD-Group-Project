@@ -84,9 +84,6 @@ public class GuestListFragment extends Fragment {
                     if (guestList.isEmpty()) {
                         tvEmpty.setVisibility(View.VISIBLE);
                     }
-                }).addOnFailureListener(e -> {
-                    progressBar.setVisibility(View.GONE);
-                    tvEmpty.setVisibility(View.VISIBLE);
                 });
     }
 }

@@ -143,7 +143,7 @@ public class MyEventsFragment extends Fragment implements TicketAdapter.OnTicket
             transaction.update(eventRegRef, "status", "Attended");
             return null;
         }).addOnSuccessListener(aVoid -> {
-            Toast.makeText(getContext(), "Attendance Marked!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "Welcome! Checked in successfully.", Toast.LENGTH_SHORT).show();
             loadMyTickets(); // Refresh the list
         }).addOnFailureListener(e -> Toast.makeText(getContext(), "Failed to mark attendance.", Toast.LENGTH_SHORT).show());
     }
@@ -154,10 +154,64 @@ public class MyEventsFragment extends Fragment implements TicketAdapter.OnTicket
     }
 
     private void showRatingDialog(Event event) {
-        // ... (existing rating dialog logic)
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        LayoutInflater inflater = requireActivity().getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.dialog_rate_event, null);
+
+        final RatingBar ratingBar = dialogView.findViewById(R.id.ratingBar);
+        final EditText etComment = dialogView.findViewById(R.id.etComment);
+        final Button btnSubmitRating = dialogView.findViewById(R.id.btnSubmitRating);
+
+        builder.setView(dialogView);
+        AlertDialog dialog = builder.create();
+
+        btnSubmitRating.setOnClickListener(v -> {
+            float rating = ratingBar.getRating();
+            String comment = etComment.getText().toString().trim();
+            if (rating > 0) {
+                submitRating(event, rating, comment, dialog);
+            }
+        });
+
+        dialog.show();
     }
 
     private void submitRating(Event event, float rating, String comment, AlertDialog dialog) {
-        // ... (existing rating submission logic)
+        final DocumentReference eventRef = db.collection("events").document(event.getEventId());
+
+        db.runTransaction((Transaction.Function<Void>) transaction -> {
+            DocumentSnapshot snapshot = transaction.get(eventRef);
+            double currentSum = snapshot.contains("ratingSum") ? snapshot.getDouble("ratingSum") : 0.0;
+            long currentCount = snapshot.contains("ratingCount") ? snapshot.getLong("ratingCount") : 0;
+
+            double newSum = currentSum + rating;
+            long newCount = currentCount + 1;
+
+            transaction.update(eventRef, "ratingSum", newSum);
+            transaction.update(eventRef, "ratingCount", newCount);
+            return null;
+        }).addOnSuccessListener(aVoid -> {
+            if (!comment.isEmpty()) {
+                Map<String, Object> commentData = new HashMap<>();
+                commentData.put("userId", mAuth.getCurrentUser().getUid());
+                commentData.put("comment", comment);
+                commentData.put("rating", rating);
+                commentData.put("timestamp", FieldValue.serverTimestamp());
+
+                eventRef.collection("comments").add(commentData).addOnSuccessListener(documentReference -> {
+                    Toast.makeText(getContext(), "Rating and comment submitted!", Toast.LENGTH_SHORT).show();
+                    dialog.dismiss();
+                }).addOnFailureListener(e -> {
+                    Toast.makeText(getContext(), "Rating submitted, but comment failed.", Toast.LENGTH_SHORT).show();
+                    dialog.dismiss();
+                });
+            } else {
+                Toast.makeText(getContext(), "Rating Submitted!", Toast.LENGTH_SHORT).show();
+                dialog.dismiss();
+            }
+        }).addOnFailureListener(e -> {
+            Toast.makeText(getContext(), "Failed to submit rating.", Toast.LENGTH_SHORT).show();
+            Log.e(TAG, "Rating submission failed", e);
+        });
     }
 }

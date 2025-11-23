@@ -176,7 +176,7 @@ public class EventDetailsFragment extends Fragment implements PosterDisplayAdapt
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
                         btnRegister.setText("View Ticket");
-                        // TODO: Navigate to MyEvents Fragment
+                        btnRegister.setEnabled(false);
                     } else {
                         btnRegister.setText("Register");
                         btnRegister.setOnClickListener(v -> registerForEvent());
@@ -193,8 +193,7 @@ public class EventDetailsFragment extends Fragment implements PosterDisplayAdapt
             if (userDoc.exists()) {
                 String userName = userDoc.getString("name");
                 String userEmail = userDoc.getString("email");
-                String userMatric = userDoc.getString("matricNo");
-
+                
                 final DocumentReference eventRef = db.collection(EVENTS_COLLECTION).document(eventId);
                 final DocumentReference userRegistrationRef = db.collection(USERS_COLLECTION).document(userId).collection("registrations").document(eventId);
                 final DocumentReference eventRegistrationRef = eventRef.collection("registrations").document(userId);
@@ -205,16 +204,17 @@ public class EventDetailsFragment extends Fragment implements PosterDisplayAdapt
                     if (event != null) {
                         if (event.getCurrentParticipants() < event.getMaxParticipants()) {
                             transaction.update(eventRef, "currentParticipants", event.getCurrentParticipants() + 1);
-                            
-                            Map<String, Object> registrationData = new HashMap<>();
-                            registrationData.put("registrationTime", com.google.firebase.Timestamp.now());
-                            transaction.set(userRegistrationRef, registrationData);
+
+                            Map<String, Object> userRegData = new HashMap<>();
+                            userRegData.put("registrationTime", com.google.firebase.Timestamp.now());
+                            userRegData.put("status", "Registered");
+                            transaction.set(userRegistrationRef, userRegData);
 
                             Map<String, Object> eventRegData = new HashMap<>();
                             eventRegData.put("timestamp", com.google.firebase.Timestamp.now());
                             eventRegData.put("userName", userName);
                             eventRegData.put("userEmail", userEmail);
-                            eventRegData.put("userMatric", userMatric);
+                            eventRegData.put("status", "Registered");
                             transaction.set(eventRegistrationRef, eventRegData);
 
                             return true;

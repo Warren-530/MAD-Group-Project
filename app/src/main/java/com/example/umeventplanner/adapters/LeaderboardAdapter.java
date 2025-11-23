@@ -51,6 +51,8 @@ public class LeaderboardAdapter extends RecyclerView.Adapter<LeaderboardAdapter.
 
         if (entry.getBannerUrl() != null && !entry.getBannerUrl().isEmpty()) {
             Glide.with(context).load(entry.getBannerUrl()).into(holder.ivEventBanner);
+        } else {
+            holder.ivEventBanner.setImageResource(android.R.drawable.ic_menu_gallery);
         }
 
         holder.itemView.setOnClickListener(v -> {

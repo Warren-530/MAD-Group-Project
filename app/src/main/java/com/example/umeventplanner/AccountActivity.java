@@ -1,5 +1,6 @@
 package com.example.umeventplanner;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
@@ -71,7 +72,11 @@ public class AccountActivity extends AppCompatActivity {
                     "course", course,
                     "matricNumber", matricNumber,
                     "role", role)
-                    .addOnSuccessListener(aVoid -> Toast.makeText(AccountActivity.this, "Profile Updated", Toast.LENGTH_SHORT).show())
+                    .addOnSuccessListener(aVoid -> {
+                        Toast.makeText(AccountActivity.this, "Profile Updated", Toast.LENGTH_SHORT).show();
+                        setResult(RESULT_OK);
+                        finish();
+                    })
                     .addOnFailureListener(e -> Toast.makeText(AccountActivity.this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show());
         }
     }
