@@ -3,8 +3,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:padding="16dp"
-    android:gravity="center_vertical">
+    android:gravity="center_vertical"
+    android:padding="16dp">
 
     <ImageView
         android:id="@+id/ivGuestAvatar"
@@ -32,5 +32,12 @@
             android:textSize="12sp"
             android:textColor="@android:color/darker_gray"/>
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/tvStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Registered"
+        android:textColor="@android:color/darker_gray" />
 
 </LinearLayout>

@@ -124,6 +124,7 @@ public class MyEventsFragment extends Fragment implements TicketAdapter.OnTicket
         this.targetEventId = ticket.getEvent().getEventId();
         ScanOptions options = new ScanOptions();
         options.setOrientationLocked(true);
+        options.setCaptureActivity(CaptureActivity.class);
         options.setPrompt("Scan Event QR Code");
         barcodeLauncher.launch(options);
     }
@@ -179,7 +180,7 @@ public class MyEventsFragment extends Fragment implements TicketAdapter.OnTicket
     private void submitRating(Event event, float rating, String comment, AlertDialog dialog) {
         final DocumentReference eventRef = db.collection("events").document(event.getEventId());
 
-        db.runTransaction((Transaction.Function<Void>) transaction -> {
+        db.runTransaction(transaction -> {
             DocumentSnapshot snapshot = transaction.get(eventRef);
             double currentSum = snapshot.contains("ratingSum") ? snapshot.getDouble("ratingSum") : 0.0;
             long currentCount = snapshot.contains("ratingCount") ? snapshot.getLong("ratingCount") : 0;

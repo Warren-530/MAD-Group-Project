@@ -112,11 +112,24 @@ public class EventManagementFragment extends Fragment {
         });
 
         cardForum.setOnClickListener(v -> {
-            FeedbackFragment fragment = FeedbackFragment.newInstance(eventId);
-            getParentFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_container, fragment)
-                    .addToBackStack(null)
-                    .commit();
+            new AlertDialog.Builder(getContext())
+                    .setTitle("Feedback & Forum")
+                    .setMessage("What would you like to view?")
+                    .setPositiveButton("Feedback", (dialog, which) -> {
+                        FeedbackFragment fragment = FeedbackFragment.newInstance(eventId);
+                        getParentFragmentManager().beginTransaction()
+                                .replace(R.id.fragment_container, fragment)
+                                .addToBackStack(null)
+                                .commit();
+                    })
+                    .setNegativeButton("Forum", (dialog, which) -> {
+                        ForumFragment fragment = ForumFragment.newInstance(eventId);
+                        getParentFragmentManager().beginTransaction()
+                                .replace(R.id.fragment_container, fragment)
+                                .addToBackStack(null)
+                                .commit();
+                    })
+                    .show();
         });
 
         btnDeleteEvent.setOnClickListener(v -> showDeleteConfirmationDialog());
