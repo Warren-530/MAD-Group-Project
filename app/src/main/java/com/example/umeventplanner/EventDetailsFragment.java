@@ -2,6 +2,7 @@ package com.example.umeventplanner;
 
 import android.app.Dialog;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,10 +32,8 @@ import java.util.Map;
 
 public class EventDetailsFragment extends Fragment implements PosterDisplayAdapter.OnPosterClickListener {
 
-    // Constants for Firestore paths
-    private static final String APP_ID = "um_event_planner"; // Use your actual App ID
-    private static final String EVENTS_COLLECTION = "artifacts/" + APP_ID + "/public/data/events";
-    private static final String USERS_COLLECTION = "artifacts/" + APP_ID + "/users";
+    private static final String EVENTS_COLLECTION = "events";
+    private static final String USERS_COLLECTION = "users";
 
     private String eventId;
     private FirebaseFirestore db;

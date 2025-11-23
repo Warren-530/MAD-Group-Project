@@ -3,6 +3,7 @@ package com.example.umeventplanner;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,6 +28,7 @@ import java.util.List;
 
 public class DiscoverFragment extends Fragment implements OnEventClickListener {
 
+    private static final String TAG = "DiscoverFragment";
     private RecyclerView rvEvents;
     private EventAdapter eventAdapter;
     private List<Event> eventList;
@@ -121,25 +123,33 @@ public class DiscoverFragment extends Fragment implements OnEventClickListener {
                 .orderBy("createdAt", Query.Direction.DESCENDING)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
+                    Log.d(TAG, "Successfully fetched " + queryDocumentSnapshots.size() + " events.");
                     List<Event> fetchedEvents = new ArrayList<>();
                     for (com.google.firebase.firestore.DocumentSnapshot document : queryDocumentSnapshots) {
                         Event event = document.toObject(Event.class);
                         if (event != null) {
                             event.setEventId(document.getId());
                             fetchedEvents.add(event);
+                            Log.d(TAG, "Event added: " + event.getTitle() + " with ID: " + event.getEventId());
                         }
                     }
                     eventAdapter.setAllEvents(fetchedEvents);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error loading events", e);
                 });
     }
 
     @Override
     public void onEventClick(Event event) {
         if (event != null && event.getEventId() != null) {
+            Log.d(TAG, "Clicked event with ID: " + event.getEventId());
             getParentFragmentManager().beginTransaction()
                     .replace(R.id.fragment_container, EventDetailsFragment.newInstance(event.getEventId()))
                     .addToBackStack(null)
                     .commit();
+        } else {
+            Log.e(TAG, "Clicked event is null or has no ID!");
         }
     }
 }

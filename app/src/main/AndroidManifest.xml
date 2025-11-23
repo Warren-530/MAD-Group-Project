@@ -22,6 +22,7 @@
         android:roundIcon="@android:mipmap/sym_def_app_icon"
         android:supportsRtl="true"
         android:theme="@style/Theme.UMEventPlanner"
+        android:enableOnBackInvokedCallback="true"
         tools:replace="android:label"
         tools:targetApi="31">
         <activity

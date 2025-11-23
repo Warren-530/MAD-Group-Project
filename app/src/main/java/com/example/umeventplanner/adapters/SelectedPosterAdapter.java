@@ -1,7 +1,6 @@
 package com.example.umeventplanner.adapters;
 
 import android.content.Context;
-import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,16 +14,16 @@ import java.util.List;
 public class SelectedPosterAdapter extends RecyclerView.Adapter<SelectedPosterAdapter.PosterViewHolder> {
 
     private final Context context;
-    private final List<Uri> posterUris;
+    private final List<Object> posterItems;
     private final OnPosterRemoveListener removeListener;
 
     public interface OnPosterRemoveListener {
         void onPosterRemoved(int position);
     }
 
-    public SelectedPosterAdapter(Context context, List<Uri> posterUris, OnPosterRemoveListener removeListener) {
+    public SelectedPosterAdapter(Context context, List<Object> posterItems, OnPosterRemoveListener removeListener) {
         this.context = context;
-        this.posterUris = posterUris;
+        this.posterItems = posterItems;
         this.removeListener = removeListener;
     }
 
@@ -37,9 +36,9 @@ public class SelectedPosterAdapter extends RecyclerView.Adapter<SelectedPosterAd
 
     @Override
     public void onBindViewHolder(@NonNull PosterViewHolder holder, int position) {
-        Uri imageUri = posterUris.get(position);
+        Object item = posterItems.get(position);
         Glide.with(context)
-                .load(imageUri)
+                .load(item)
                 .into(holder.ivPosterThumbnail);
 
         holder.btnRemovePoster.setOnClickListener(v -> {
@@ -51,7 +50,7 @@ public class SelectedPosterAdapter extends RecyclerView.Adapter<SelectedPosterAd
 
     @Override
     public int getItemCount() {
-        return posterUris.size();
+        return posterItems.size();
     }
 
     static class PosterViewHolder extends RecyclerView.ViewHolder {

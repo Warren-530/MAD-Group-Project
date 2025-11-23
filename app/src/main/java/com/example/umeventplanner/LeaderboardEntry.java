@@ -15,6 +15,10 @@ public class LeaderboardEntry {
         this.eventCount = eventCount;
     }
 
+    public LeaderboardEntry() {
+        // Default constructor for Firestore
+    }
+
     // Getters
     public String getOrganizerName() {
         return organizerName;
