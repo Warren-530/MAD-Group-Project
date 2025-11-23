@@ -3,6 +3,7 @@ package com.example.umeventplanner;
 public class User {
     private String name;
     private String matricNo;
+    private String email;
 
     public User() {}
 
@@ -20,5 +21,13 @@ public class User {
 
     public void setMatricNo(String matricNo) {
         this.matricNo = matricNo;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 }
