@@ -6,16 +6,19 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.example.umeventplanner.LeaderboardEntry;
 import com.example.umeventplanner.R;
+
 import java.util.List;
 
 public class LeaderboardAdapter extends RecyclerView.Adapter<LeaderboardAdapter.LeaderboardViewHolder> {
 
-    private final Context context;
-    private final List<LeaderboardEntry> leaderboardEntries;
+    private Context context;
+    private List<LeaderboardEntry> leaderboardEntries;
 
     public LeaderboardAdapter(Context context, List<LeaderboardEntry> leaderboardEntries) {
         this.context = context;
@@ -32,10 +35,9 @@ public class LeaderboardAdapter extends RecyclerView.Adapter<LeaderboardAdapter.
     @Override
     public void onBindViewHolder(@NonNull LeaderboardViewHolder holder, int position) {
         LeaderboardEntry entry = leaderboardEntries.get(position);
-
+        holder.tvOrganizerName.setText(entry.getEventName());
+        holder.tvScore.setText(String.format("%.1f pts", entry.getScore()));
         holder.tvRank.setText(String.valueOf(entry.getRank()));
-        holder.tvOrganizerName.setText(entry.getOrganizerName());
-        holder.tvScore.setText(String.format("%.1f pts", entry.getTotalScore()));
 
         switch (entry.getRank()) {
             case 1:
@@ -58,10 +60,10 @@ public class LeaderboardAdapter extends RecyclerView.Adapter<LeaderboardAdapter.
         return leaderboardEntries.size();
     }
 
-    static class LeaderboardViewHolder extends RecyclerView.ViewHolder {
+    public static class LeaderboardViewHolder extends RecyclerView.ViewHolder {
         TextView tvRank, tvOrganizerName, tvScore;
 
-        LeaderboardViewHolder(@NonNull View itemView) {
+        public LeaderboardViewHolder(@NonNull View itemView) {
             super(itemView);
             tvRank = itemView.findViewById(R.id.tvRank);
             tvOrganizerName = itemView.findViewById(R.id.tvOrganizerName);

@@ -2,38 +2,28 @@ package com.example.umeventplanner;
 
 public class LeaderboardEntry {
 
-    private String organizerName;
-    private String organizerId;
-    private double totalScore;
-    private int eventCount;
+    private String eventId;
+    private String eventName;
+    private double score;
     private int rank;
 
-    public LeaderboardEntry(String organizerName, String organizerId, double totalScore, int eventCount) {
-        this.organizerName = organizerName;
-        this.organizerId = organizerId;
-        this.totalScore = totalScore;
-        this.eventCount = eventCount;
-    }
-
-    public LeaderboardEntry() {
-        // Default constructor for Firestore
+    public LeaderboardEntry(String eventId, String eventName, double score) {
+        this.eventId = eventId;
+        this.eventName = eventName;
+        this.score = score;
     }
 
     // Getters
-    public String getOrganizerName() {
-        return organizerName;
+    public String getEventId() {
+        return eventId;
     }
 
-    public String getOrganizerId() {
-        return organizerId;
+    public String getEventName() {
+        return eventName;
     }
 
-    public double getTotalScore() {
-        return totalScore;
-    }
-
-    public int getEventCount() {
-        return eventCount;
+    public double getScore() {
+        return score;
     }
 
     public int getRank() {
@@ -41,20 +31,16 @@ public class LeaderboardEntry {
     }
 
     // Setters
-    public void setOrganizerName(String organizerName) {
-        this.organizerName = organizerName;
+    public void setEventId(String eventId) {
+        this.eventId = eventId;
     }
 
-    public void setOrganizerId(String organizerId) {
-        this.organizerId = organizerId;
+    public void setEventName(String eventName) {
+        this.eventName = eventName;
     }
 
-    public void setTotalScore(double totalScore) {
-        this.totalScore = totalScore;
-    }
-
-    public void setEventCount(int eventCount) {
-        this.eventCount = eventCount;
+    public void setScore(double score) {
+        this.score = score;
     }
 
     public void setRank(int rank) {
