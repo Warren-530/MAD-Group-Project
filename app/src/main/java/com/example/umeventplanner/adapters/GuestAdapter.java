@@ -10,16 +10,16 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.umeventplanner.R;
-import com.example.umeventplanner.User;
 
 import java.util.List;
+import java.util.Map;
 
 public class GuestAdapter extends RecyclerView.Adapter<GuestAdapter.GuestViewHolder> {
 
     private Context context;
-    private List<User> guestList;
+    private List<Map<String, Object>> guestList;
 
-    public GuestAdapter(Context context, List<User> guestList) {
+    public GuestAdapter(Context context, List<Map<String, Object>> guestList) {
         this.context = context;
         this.guestList = guestList;
     }
@@ -33,9 +33,9 @@ public class GuestAdapter extends RecyclerView.Adapter<GuestAdapter.GuestViewHol
 
     @Override
     public void onBindViewHolder(@NonNull GuestViewHolder holder, int position) {
-        User guest = guestList.get(position);
-        holder.tvGuestName.setText(guest.getName());
-        holder.tvGuestEmail.setText(guest.getEmail()); // Assuming User has getEmail()
+        Map<String, Object> guest = guestList.get(position);
+        holder.tvGuestName.setText((String) guest.get("userName"));
+        holder.tvGuestEmail.setText((String) guest.get("userEmail"));
     }
 
     @Override

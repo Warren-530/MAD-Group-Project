@@ -22,6 +22,7 @@ import com.bumptech.glide.Glide;
 import com.example.umeventplanner.adapters.CommentAdapter;
 import com.example.umeventplanner.adapters.PosterDisplayAdapter;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -184,29 +185,48 @@ public class EventDetailsFragment extends Fragment implements PosterDisplayAdapt
     }
 
     private void registerForEvent() {
-        String userId = mAuth.getCurrentUser().getUid();
-        final DocumentReference eventRef = db.collection(EVENTS_COLLECTION).document(eventId);
-        final DocumentReference userRegistrationRef = db.collection(USERS_COLLECTION).document(userId).collection("registrations").document(eventId);
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser == null) return;
+        String userId = currentUser.getUid();
 
-        db.runTransaction(transaction -> {
-            DocumentSnapshot eventSnapshot = transaction.get(eventRef);
-            Event event = eventSnapshot.toObject(Event.class);
-            if (event != null) {
-                if (event.getCurrentParticipants() < event.getMaxParticipants()) {
-                    transaction.update(eventRef, "currentParticipants", event.getCurrentParticipants() + 1);
-                    Map<String, Object> registrationData = new HashMap<>();
-                    registrationData.put("registrationTime", com.google.firebase.Timestamp.now());
-                    transaction.set(userRegistrationRef, registrationData);
-                    return true;
-                }
-            }
-            return false;
-        }).addOnSuccessListener(success -> {
-            if (success) {
-                Toast.makeText(getContext(), "Registered Successfully!", Toast.LENGTH_SHORT).show();
-                checkRegistrationStatus();
-            } else {
-                Toast.makeText(getContext(), "Event is full or registration is not available.", Toast.LENGTH_SHORT).show();
+        db.collection(USERS_COLLECTION).document(userId).get().addOnSuccessListener(userDoc -> {
+            if (userDoc.exists()) {
+                String userName = userDoc.getString("name");
+                String userEmail = userDoc.getString("email");
+
+                final DocumentReference eventRef = db.collection(EVENTS_COLLECTION).document(eventId);
+                final DocumentReference userRegistrationRef = db.collection(USERS_COLLECTION).document(userId).collection("registrations").document(eventId);
+                final DocumentReference eventRegistrationRef = eventRef.collection("registrations").document(userId);
+
+                db.runTransaction(transaction -> {
+                    DocumentSnapshot eventSnapshot = transaction.get(eventRef);
+                    Event event = eventSnapshot.toObject(Event.class);
+                    if (event != null) {
+                        if (event.getCurrentParticipants() < event.getMaxParticipants()) {
+                            transaction.update(eventRef, "currentParticipants", event.getCurrentParticipants() + 1);
+                            
+                            Map<String, Object> registrationData = new HashMap<>();
+                            registrationData.put("registrationTime", com.google.firebase.Timestamp.now());
+                            transaction.set(userRegistrationRef, registrationData);
+
+                            Map<String, Object> eventRegData = new HashMap<>();
+                            eventRegData.put("timestamp", com.google.firebase.Timestamp.now());
+                            eventRegData.put("userName", userName);
+                            eventRegData.put("userEmail", userEmail);
+                            transaction.set(eventRegistrationRef, eventRegData);
+
+                            return true;
+                        }
+                    }
+                    return false;
+                }).addOnSuccessListener(success -> {
+                    if (success) {
+                        Toast.makeText(getContext(), "Registered Successfully!", Toast.LENGTH_SHORT).show();
+                        checkRegistrationStatus();
+                    } else {
+                        Toast.makeText(getContext(), "Event is full or registration is not available.", Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
         });
     }

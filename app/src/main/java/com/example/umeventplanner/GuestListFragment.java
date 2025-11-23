@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -18,14 +19,16 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class GuestListFragment extends Fragment {
 
     private RecyclerView rvGuests;
     private GuestAdapter adapter;
-    private List<User> guestList;
+    private List<Map<String, Object>> guestList;
     private FirebaseFirestore db;
     private ProgressBar progressBar;
+    private TextView tvEmpty;
     private String eventId;
 
     public static GuestListFragment newInstance(String eventId) {
@@ -52,6 +55,7 @@ public class GuestListFragment extends Fragment {
         db = FirebaseFirestore.getInstance();
         rvGuests = view.findViewById(R.id.rvGuests);
         progressBar = view.findViewById(R.id.progressBar);
+        tvEmpty = view.findViewById(R.id.tvEmpty);
         guestList = new ArrayList<>();
 
         rvGuests.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -64,6 +68,7 @@ public class GuestListFragment extends Fragment {
     }
 
     private void loadGuests() {
+        if (eventId == null) return;
         progressBar.setVisibility(View.VISIBLE);
 
         db.collection("events").document(eventId).collection("registrations")
@@ -71,11 +76,17 @@ public class GuestListFragment extends Fragment {
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     guestList.clear();
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
-                        User user = document.toObject(User.class);
-                        guestList.add(user);
+                        guestList.add(document.getData());
                     }
                     adapter.notifyDataSetChanged();
                     progressBar.setVisibility(View.GONE);
+
+                    if (guestList.isEmpty()) {
+                        tvEmpty.setVisibility(View.VISIBLE);
+                    }
+                }).addOnFailureListener(e -> {
+                    progressBar.setVisibility(View.GONE);
+                    tvEmpty.setVisibility(View.VISIBLE);
                 });
     }
 }
