@@ -101,7 +101,7 @@
             android:id="@+id/tvSustainabilityHeader"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android.layout_marginTop="24dp"
+            android:layout_marginTop="24dp"
             android:text="Sustainability Score"
             android:textAppearance="@style/TextAppearance.AppCompat.Title"
             app:layout_constraintTop_toBottomOf="@id/rvPosterCarousel"
@@ -146,14 +146,47 @@
             app:layout_constraintStart_toStartOf="@id/tvDetailTitle"
             app:layout_constraintEnd_toEndOf="@id/chipStatus" />
 
-        <!-- Section 5: Action -->
+        <!-- Section 5: Ratings and Comments (Planner Only) -->
+        <TextView
+            android:id="@+id/tvRatingsHeader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="Ratings and Comments"
+            android:textAppearance="@style/TextAppearance.AppCompat.Title"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@id/llChecklistContainer"
+            app:layout_constraintStart_toStartOf="@id/tvDetailTitle" />
+
+        <RatingBar
+            android:id="@+id/rbAverageRating"
+            style="?android:attr/ratingBarStyleIndicator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:isIndicator="true"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@id/tvRatingsHeader"
+            app:layout_constraintStart_toStartOf="@id/tvDetailTitle" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvComments"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@id/rbAverageRating"
+            app:layout_constraintStart_toStartOf="@id/tvDetailTitle"
+            app:layout_constraintEnd_toEndOf="@id/chipStatus" />
+
+        <!-- Section 6: Action -->
         <Button
             android:id="@+id/btnRegister"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"
             android:text="Register Now"
-            app:layout_constraintTop_toBottomOf="@id/llChecklistContainer"
+            app:layout_constraintTop_toBottomOf="@id/rvComments"
             app:layout_constraintStart_toStartOf="@id/tvDetailTitle"
             app:layout_constraintEnd_toEndOf="@id/chipStatus" />
 

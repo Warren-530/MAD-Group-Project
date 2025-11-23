@@ -20,18 +20,23 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.example.umeventplanner.adapters.CommentAdapter;
 import com.example.umeventplanner.adapters.PosterDisplayAdapter;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class EventDetailsFragment extends Fragment implements PosterDisplayAdapter.OnPosterClickListener {
 
+    private static final String TAG = "EventDetailsFragment";
     private static final String EVENTS_COLLECTION = "events";
     private static final String USERS_COLLECTION = "users";
 
@@ -41,10 +46,10 @@ public class EventDetailsFragment extends Fragment implements PosterDisplayAdapt
 
     // UI Elements
     private ImageView ivDetailBanner;
-    private TextView tvDetailTitle, tvDetailDate, tvDetailLocation, tvImpactLabel, tvDetailDescription;
+    private TextView tvDetailTitle, tvDetailDate, tvDetailLocation, tvImpactLabel, tvDetailDescription, tvRatingsHeader;
     private com.google.android.material.chip.Chip chipStatus;
-    private RecyclerView rvPosterCarousel;
-    private RatingBar rbDetailScore;
+    private RecyclerView rvPosterCarousel, rvComments;
+    private RatingBar rbDetailScore, rbAverageRating;
     private LinearLayout llChecklistContainer;
     private Button btnRegister;
 
@@ -88,6 +93,9 @@ public class EventDetailsFragment extends Fragment implements PosterDisplayAdapt
         tvImpactLabel = view.findViewById(R.id.tvImpactLabel);
         llChecklistContainer = view.findViewById(R.id.llChecklistContainer);
         btnRegister = view.findViewById(R.id.btnRegister);
+        tvRatingsHeader = view.findViewById(R.id.tvRatingsHeader);
+        rbAverageRating = view.findViewById(R.id.rbAverageRating);
+        rvComments = view.findViewById(R.id.rvComments);
     }
 
     private void loadEventDetails() {
@@ -96,6 +104,7 @@ public class EventDetailsFragment extends Fragment implements PosterDisplayAdapt
             if (documentSnapshot.exists()) {
                 Event event = documentSnapshot.toObject(Event.class);
                 if (event != null && getContext() != null) {
+                    // Populate UI
                     if (event.getBannerUrl() != null && !event.getBannerUrl().isEmpty()) {
                         Glide.with(getContext()).load(event.getBannerUrl()).into(ivDetailBanner);
                     }
@@ -116,8 +125,8 @@ public class EventDetailsFragment extends Fragment implements PosterDisplayAdapt
 
                     if (getContext() != null && event.getPosterUrls() != null) {
                         rvPosterCarousel.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
-                        PosterDisplayAdapter adapter = new PosterDisplayAdapter(getContext(), event.getPosterUrls(), this);
-                        rvPosterCarousel.setAdapter(adapter);
+                        PosterDisplayAdapter posterAdapter = new PosterDisplayAdapter(getContext(), event.getPosterUrls(), this);
+                        rvPosterCarousel.setAdapter(posterAdapter);
                     }
 
                     llChecklistContainer.removeAllViews();
@@ -130,9 +139,49 @@ public class EventDetailsFragment extends Fragment implements PosterDisplayAdapt
                             }
                         }
                     }
+
+                    // *** DEBUGGING STARTS HERE ***
+                    if (mAuth.getCurrentUser() != null) {
+                        String currentUserUid = mAuth.getCurrentUser().getUid();
+                        List<String> plannerUids = event.getPlannerUIDs();
+                        Log.d(TAG, "Current User UID: " + currentUserUid);
+                        Log.d(TAG, "Planner UIDs from event: " + (plannerUids != null ? plannerUids.toString() : "null"));
+
+                        if (plannerUids != null && plannerUids.contains(currentUserUid)) {
+                            Log.d(TAG, "User is a planner. Showing ratings.");
+                            tvRatingsHeader.setVisibility(View.VISIBLE);
+                            rbAverageRating.setVisibility(View.VISIBLE);
+                            rvComments.setVisibility(View.VISIBLE);
+                            rbAverageRating.setRating((float) event.getAverageRating());
+                            loadComments();
+                        } else {
+                            Log.d(TAG, "User is NOT a planner. Hiding ratings.");
+                        }
+                    } else {
+                        Log.d(TAG, "Not logged in. Hiding ratings.");
+                    }
+                    // *** DEBUGGING ENDS HERE ***
                 }
             }
         });
+    }
+
+    private void loadComments() {
+        List<Comment> commentList = new ArrayList<>();
+        CommentAdapter commentAdapter = new CommentAdapter(getContext(), commentList);
+        rvComments.setLayoutManager(new LinearLayoutManager(getContext()));
+        rvComments.setAdapter(commentAdapter);
+
+        db.collection(EVENTS_COLLECTION).document(eventId).collection("comments")
+                .orderBy("timestamp", Query.Direction.DESCENDING)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                        Comment comment = document.toObject(Comment.class);
+                        commentList.add(comment);
+                    }
+                    commentAdapter.notifyDataSetChanged();
+                });
     }
 
     private void checkRegistrationStatus() {
@@ -142,9 +191,7 @@ public class EventDetailsFragment extends Fragment implements PosterDisplayAdapt
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
                         btnRegister.setText("View Ticket");
-                        btnRegister.setOnClickListener(v -> {
-                            // TODO: Navigate to MyEvents Fragment
-                        });
+                        // TODO: Navigate to MyEvents Fragment
                     } else {
                         btnRegister.setText("Register");
                         btnRegister.setOnClickListener(v -> registerForEvent());
@@ -159,23 +206,21 @@ public class EventDetailsFragment extends Fragment implements PosterDisplayAdapt
 
         db.runTransaction(transaction -> {
             DocumentSnapshot eventSnapshot = transaction.get(eventRef);
-            Long maxParticipants = eventSnapshot.getLong("maxParticipants");
-            Long currentParticipants = eventSnapshot.getLong("currentParticipants");
-            if (currentParticipants == null) currentParticipants = 0L;
-
-            if (maxParticipants != null && currentParticipants < maxParticipants) {
-                transaction.update(eventRef, "currentParticipants", currentParticipants + 1);
-                Map<String, Object> registrationData = new HashMap<>();
-                registrationData.put("registrationTime", com.google.firebase.Timestamp.now());
-                transaction.set(userRegistrationRef, registrationData);
-                return true;
-            } else {
-                return false; // Event is full or maxParticipants not set
+            Event event = eventSnapshot.toObject(Event.class);
+            if (event != null) {
+                if (event.getCurrentParticipants() < event.getMaxParticipants()) {
+                    transaction.update(eventRef, "currentParticipants", event.getCurrentParticipants() + 1);
+                    Map<String, Object> registrationData = new HashMap<>();
+                    registrationData.put("registrationTime", com.google.firebase.Timestamp.now());
+                    transaction.set(userRegistrationRef, registrationData);
+                    return true;
+                }
             }
+            return false;
         }).addOnSuccessListener(success -> {
             if (success) {
                 Toast.makeText(getContext(), "Registered Successfully!", Toast.LENGTH_SHORT).show();
-                checkRegistrationStatus(); // Update button state
+                checkRegistrationStatus();
             } else {
                 Toast.makeText(getContext(), "Event is full or registration is not available.", Toast.LENGTH_SHORT).show();
             }

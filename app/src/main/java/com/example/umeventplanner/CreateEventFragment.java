@@ -75,7 +75,7 @@ public class CreateEventFragment extends Fragment implements SelectedPosterAdapt
     private String currentPickerRequest;
     private String existingEventId = null;
     private boolean isEditMode = false;
-    private Object bannerItem = null; // Can be Uri or String
+    private Uri bannerUri = null;
     private String currentBannerUrl = null;
 
     // Activity Result Launchers
@@ -91,8 +91,8 @@ public class CreateEventFragment extends Fragment implements SelectedPosterAdapt
             result -> {
                 if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
                     if ("banner".equals(currentPickerRequest)) {
-                        bannerItem = result.getData().getData();
-                        ivEventBanner.setImageURI((Uri) bannerItem);
+                        bannerUri = result.getData().getData();
+                        ivEventBanner.setImageURI(bannerUri);
                     } else if ("poster".equals(currentPickerRequest)) {
                         if (result.getData().getClipData() != null) {
                             ClipData clipData = result.getData().getClipData();
@@ -123,14 +123,12 @@ public class CreateEventFragment extends Fragment implements SelectedPosterAdapt
         initViews(view); // Initialize all views first
         setupListeners();
 
-        if (getArguments() != null) {
+        if (getArguments() != null && getArguments().containsKey("eventId")) {
             existingEventId = getArguments().getString("eventId");
-            if (existingEventId != null) {
-                isEditMode = true;
-                tvHeader.setText("Edit Event"); // Now this is safe
-                btnPublish.setText("Update Event");
-                loadEventData(existingEventId);
-            }
+            isEditMode = true;
+            tvHeader.setText("Edit Event");
+            btnPublish.setText("Update Event");
+            loadEventData(existingEventId);
         }
 
         return view;
@@ -169,9 +167,10 @@ public class CreateEventFragment extends Fragment implements SelectedPosterAdapt
             }
         }
     }
-    
+
     private void loadEventData(String eventId) {
-        FirebaseFirestore.getInstance().collection("events").document(eventId).get().addOnSuccessListener(document -> {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("events").document(eventId).get().addOnSuccessListener(document -> {
             if (document.exists()) {
                 Event event = document.toObject(Event.class);
                 if (event != null && getContext() != null) {
@@ -184,10 +183,12 @@ public class CreateEventFragment extends Fragment implements SelectedPosterAdapt
                     etMaxParticipants.setText(String.valueOf(event.getMaxParticipants()));
 
                     currentBannerUrl = event.getBannerUrl();
-                    if (currentBannerUrl != null) {
-                        bannerItem = currentBannerUrl;
-                        Glide.with(getContext()).load(bannerItem).into(ivEventBanner);
+                    if (currentBannerUrl != null && !currentBannerUrl.isEmpty()) {
+                        Glide.with(getContext()).load(currentBannerUrl).into(ivEventBanner);
                     }
+
+                    posterItems.addAll(event.getPosterUrls());
+                    adapter.notifyDataSetChanged();
 
                     if (event.getCategories() != null) {
                         for (String category : event.getCategories()) {
@@ -210,12 +211,7 @@ public class CreateEventFragment extends Fragment implements SelectedPosterAdapt
                                 }
                             }
                         }
-                        calculateScore();
                     }
-                    
-                    posterItems.clear();
-                    posterItems.addAll(event.getPosterUrls());
-                    adapter.notifyDataSetChanged();
                 }
             }
         });
@@ -317,27 +313,27 @@ public class CreateEventFragment extends Fragment implements SelectedPosterAdapt
     }
 
     private void uploadImagesAndSave(List<String> selectedCategories) {
-        final String eventId = isEditMode ? existingEventId : UUID.randomUUID().toString();
-
-        List<Uri> newPosterUris = new ArrayList<>();
-        List<String> existingPosterUrls = new ArrayList<>();
+        List<Uri> newPosters = new ArrayList<>();
+        List<String> existingPosters = new ArrayList<>();
         for (Object item : posterItems) {
             if (item instanceof Uri) {
-                newPosterUris.add((Uri) item);
+                newPosters.add((Uri) item);
             } else if (item instanceof String) {
-                existingPosterUrls.add((String) item);
+                existingPosters.add((String) item);
             }
         }
 
-        final CountDownLatch latch = new CountDownLatch(newPosterUris.size() + (bannerItem instanceof Uri ? 1 : 0));
-        AtomicReference<String> finalBannerUrl = new AtomicReference<>(bannerItem instanceof String ? (String) bannerItem : null);
-        List<String> finalPosterUrls = new ArrayList<>(existingPosterUrls);
+        String finalBannerUrl = (bannerUri == null) ? currentBannerUrl : null;
 
-        if (bannerItem instanceof Uri) {
-            MediaManager.get().upload((Uri) bannerItem).unsigned("MAD Assignment").callback(new UploadCallback() {
+        CountDownLatch latch = new CountDownLatch(newPosters.size() + (bannerUri != null ? 1 : 0));
+        AtomicReference<String> uploadedBannerUrl = new AtomicReference<>(finalBannerUrl);
+        List<String> uploadedPosterUrls = new ArrayList<>(existingPosters);
+
+        if (bannerUri != null) {
+            MediaManager.get().upload(bannerUri).unsigned("MAD Assignment").callback(new UploadCallback() {
                 @Override
                 public void onSuccess(String requestId, Map resultData) {
-                    finalBannerUrl.set((String) resultData.get("secure_url"));
+                    uploadedBannerUrl.set((String) resultData.get("secure_url"));
                     latch.countDown();
                 }
                 @Override public void onError(String requestId, ErrorInfo error) { latch.countDown(); }
@@ -345,15 +341,13 @@ public class CreateEventFragment extends Fragment implements SelectedPosterAdapt
                 @Override public void onProgress(String requestId, long bytes, long totalBytes) { }
                 @Override public void onReschedule(String requestId, ErrorInfo error) { }
             }).dispatch();
-        } else {
-            finalBannerUrl.set((String) bannerItem);
         }
 
-        for (Uri posterUri : newPosterUris) {
+        for (Uri posterUri : newPosters) {
             MediaManager.get().upload(posterUri).unsigned("MAD Assignment").callback(new UploadCallback() {
                 @Override
                 public void onSuccess(String requestId, Map resultData) {
-                    finalPosterUrls.add((String) resultData.get("secure_url"));
+                    uploadedPosterUrls.add((String) resultData.get("secure_url"));
                     latch.countDown();
                 }
                 @Override public void onError(String requestId, ErrorInfo error) { latch.countDown(); }
@@ -367,7 +361,7 @@ public class CreateEventFragment extends Fragment implements SelectedPosterAdapt
             try {
                 latch.await();
                 if (getActivity() != null) {
-                    getActivity().runOnUiThread(() -> saveEventToFirestore(eventId, finalBannerUrl.get(), finalPosterUrls, selectedCategories));
+                    getActivity().runOnUiThread(() -> saveEventToFirestore(uploadedBannerUrl.get(), uploadedPosterUrls, selectedCategories));
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -375,7 +369,9 @@ public class CreateEventFragment extends Fragment implements SelectedPosterAdapt
         }).start();
     }
 
-    private void saveEventToFirestore(String eventId, String bannerUrl, List<String> posterUrls, List<String> selectedCategories) {
+    private void saveEventToFirestore(String bannerUrl, List<String> posterUrls, List<String> selectedCategories) {
+        String eventId = (isEditMode) ? existingEventId : UUID.randomUUID().toString();
+
         Map<String, Object> eventData = new HashMap<>();
         eventData.put("title", etEventTitle.getText().toString());
         eventData.put("description", etEventDesc.getText().toString());
@@ -398,7 +394,17 @@ public class CreateEventFragment extends Fragment implements SelectedPosterAdapt
         }
         eventData.put("checklist", checklist);
 
-        if (!isEditMode) {
+        if (isEditMode) {
+            FirebaseFirestore.getInstance().collection("events").document(existingEventId).update(eventData)
+                    .addOnSuccessListener(aVoid -> {
+                        Toast.makeText(getContext(), "Event Updated", Toast.LENGTH_SHORT).show();
+                        getParentFragmentManager().popBackStack();
+                    })
+                    .addOnFailureListener(e -> {
+                        setLoading(false);
+                        Toast.makeText(getContext(), "Error updating event: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    });
+        } else {
             eventData.put("status", "Published");
             List<String> plannerUIDs = new ArrayList<>(collaboratorIds);
             plannerUIDs.add(FirebaseAuth.getInstance().getCurrentUser().getUid());
@@ -410,18 +416,8 @@ public class CreateEventFragment extends Fragment implements SelectedPosterAdapt
                         getParentFragmentManager().popBackStack();
                     })
                     .addOnFailureListener(e -> {
+                        setLoading(false);
                         Toast.makeText(getContext(), "Error saving event: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                        setLoading(false);
-                    });
-        } else {
-            FirebaseFirestore.getInstance().collection("events").document(eventId).update(eventData)
-                    .addOnSuccessListener(aVoid -> {
-                        Toast.makeText(getContext(), "Event Updated!", Toast.LENGTH_SHORT).show();
-                        getParentFragmentManager().popBackStack();
-                    })
-                    .addOnFailureListener(e -> {
-                        Toast.makeText(getContext(), "Error updating event: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                        setLoading(false);
                     });
         }
     }

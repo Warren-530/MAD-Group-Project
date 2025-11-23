@@ -24,14 +24,17 @@ public class Event implements Serializable {
     private String status;
     private List<String> plannerUIDs;
     private Timestamp createdAt;
-    private List<String> categories; // New field
+    private List<String> categories;
+    private double ratingSum = 0.0;
+    private int ratingCount = 0;
+    private int currentParticipants = 0; // New field
 
     public Event() {
         // Default constructor for Firestore
         this.posterUrls = new ArrayList<>();
         this.plannerUIDs = new ArrayList<>();
         this.checklist = new HashMap<>();
-        this.categories = new ArrayList<>(); // Initialize new field
+        this.categories = new ArrayList<>();
     }
 
     // Getters
@@ -50,7 +53,10 @@ public class Event implements Serializable {
     public String getStatus() { return status; }
     public List<String> getPlannerUIDs() { return plannerUIDs; }
     public Timestamp getCreatedAt() { return createdAt; }
-    public List<String> getCategories() { return categories; } // Getter for new field
+    public List<String> getCategories() { return categories; }
+    public double getRatingSum() { return ratingSum; }
+    public int getRatingCount() { return ratingCount; }
+    public int getCurrentParticipants() { return currentParticipants; } // Getter for new field
 
     // Setters
     public void setEventId(String eventId) { this.eventId = eventId; }
@@ -68,5 +74,12 @@ public class Event implements Serializable {
     public void setStatus(String status) { this.status = status; }
     public void setPlannerUIDs(List<String> plannerUIDs) { this.plannerUIDs = plannerUIDs; }
     public void setCreatedAt(Timestamp createdAt) { this.createdAt = createdAt; }
-    public void setCategories(List<String> categories) { this.categories = categories; } // Setter for new field
+    public void setCategories(List<String> categories) { this.categories = categories; }
+    public void setRatingSum(double ratingSum) { this.ratingSum = ratingSum; }
+    public void setRatingCount(int ratingCount) { this.ratingCount = ratingCount; }
+    public void setCurrentParticipants(int currentParticipants) { this.currentParticipants = currentParticipants; } // Setter for new field
+
+    public double getAverageRating() {
+        return ratingCount == 0 ? 0.0 : ratingSum / ratingCount;
+    }
 }
