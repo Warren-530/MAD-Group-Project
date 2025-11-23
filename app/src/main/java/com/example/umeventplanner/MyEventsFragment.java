@@ -143,7 +143,6 @@ public class MyEventsFragment extends Fragment implements TicketAdapter.OnTicket
     private void submitRating(Event event, float rating, String comment, AlertDialog dialog) {
         final DocumentReference eventRef = db.collection("events").document(event.getEventId());
 
-        // Transaction to update the average rating
         db.runTransaction((Transaction.Function<Void>) transaction -> {
             DocumentSnapshot snapshot = transaction.get(eventRef);
             double currentSum = snapshot.contains("ratingSum") ? snapshot.getDouble("ratingSum") : 0.0;
@@ -156,10 +155,6 @@ public class MyEventsFragment extends Fragment implements TicketAdapter.OnTicket
             transaction.update(eventRef, "ratingCount", newCount);
             return null;
         }).addOnSuccessListener(aVoid -> {
-            Toast.makeText(getContext(), "Rating Submitted!", Toast.LENGTH_SHORT).show();
-            dialog.dismiss();
-
-            // Save the comment if it exists
             if (!comment.isEmpty()) {
                 Map<String, Object> commentData = new HashMap<>();
                 commentData.put("userId", mAuth.getCurrentUser().getUid());
@@ -167,7 +162,16 @@ public class MyEventsFragment extends Fragment implements TicketAdapter.OnTicket
                 commentData.put("rating", rating);
                 commentData.put("timestamp", FieldValue.serverTimestamp());
 
-                eventRef.collection("comments").add(commentData);
+                eventRef.collection("comments").add(commentData).addOnSuccessListener(documentReference -> {
+                    Toast.makeText(getContext(), "Rating and comment submitted!", Toast.LENGTH_SHORT).show();
+                    dialog.dismiss();
+                }).addOnFailureListener(e -> {
+                    Toast.makeText(getContext(), "Rating submitted, but comment failed.", Toast.LENGTH_SHORT).show();
+                    dialog.dismiss();
+                });
+            } else {
+                Toast.makeText(getContext(), "Rating Submitted!", Toast.LENGTH_SHORT).show();
+                dialog.dismiss();
             }
         }).addOnFailureListener(e -> {
             Toast.makeText(getContext(), "Failed to submit rating.", Toast.LENGTH_SHORT).show();

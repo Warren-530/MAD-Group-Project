@@ -20,9 +20,10 @@ import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-public class LeaderboardFragment extends Fragment {
+public class LeaderboardFragment extends Fragment implements LeaderboardAdapter.OnLeaderboardClickListener {
 
     private static final String TAG = "LeaderboardFragment";
 
@@ -47,7 +48,7 @@ public class LeaderboardFragment extends Fragment {
 
         // Setup RecyclerView
         rvLeaderboard.setLayoutManager(new LinearLayoutManager(getContext()));
-        adapter = new LeaderboardAdapter(getContext(), leaderboardEntries);
+        adapter = new LeaderboardAdapter(getContext(), leaderboardEntries, this);
         rvLeaderboard.setAdapter(adapter);
 
         loadLeaderboardData();
@@ -61,8 +62,6 @@ public class LeaderboardFragment extends Fragment {
 
         db.collection("events")
                 .whereEqualTo("status", "Published")
-                .orderBy("sustainabilityScore", Query.Direction.DESCENDING)
-                .limit(20)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     if (queryDocumentSnapshots.isEmpty()) {
@@ -70,26 +69,55 @@ public class LeaderboardFragment extends Fragment {
                         progressBar.setVisibility(View.GONE);
                         return;
                     }
-                    leaderboardEntries.clear();
-                    int rank = 1;
+
+                    List<LeaderboardEntry> entries = new ArrayList<>();
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                         Event event = document.toObject(Event.class);
                         if (event != null) {
-                            LeaderboardEntry entry = new LeaderboardEntry(
+                            double greenScore = event.getSustainabilityScore();
+                            double avgRating = event.getAverageRating();
+
+                            // Formula: (green * 0.6) + (rating * 0.4)
+                            double finalScore = (greenScore * 0.6) + (avgRating * 0.4);
+
+                            entries.add(new LeaderboardEntry(
                                     document.getId(),
                                     event.getTitle(),
-                                    event.getSustainabilityScore()
-                            );
-                            entry.setRank(rank++);
-                            leaderboardEntries.add(entry);
+                                    event.getBannerUrl(),
+                                    greenScore,
+                                    avgRating,
+                                    finalScore
+                            ));
                         }
                     }
+
+                    // Sort list by finalScore descending
+                    Collections.sort(entries, (o1, o2) -> Double.compare(o2.getFinalScore(), o1.getFinalScore()));
+
+                    // Assign ranks
+                    for (int i = 0; i < entries.size(); i++) {
+                        entries.get(i).setRank(i + 1);
+                    }
+
+                    leaderboardEntries.clear();
+                    leaderboardEntries.addAll(entries);
                     adapter.notifyDataSetChanged();
                     progressBar.setVisibility(View.GONE);
+
                 }).addOnFailureListener(e -> {
                     Log.e(TAG, "Error loading leaderboard", e);
                     progressBar.setVisibility(View.GONE);
                     tvEmpty.setVisibility(View.VISIBLE);
                 });
+    }
+
+    @Override
+    public void onEventClick(String eventId) {
+        if (eventId != null && getParentFragmentManager() != null) {
+            getParentFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_container, EventDetailsFragment.newInstance(eventId))
+                    .addToBackStack(null)
+                    .commit();
+        }
     }
 }

@@ -4,43 +4,72 @@ public class LeaderboardEntry {
 
     private String eventId;
     private String eventName;
-    private double score;
+    private String bannerUrl;
+    private double greenScore;
+    private double userRating;
+    private double finalScore;
     private int rank;
 
-    public LeaderboardEntry(String eventId, String eventName, double score) {
+    public LeaderboardEntry(String eventId, String eventName, String bannerUrl, double greenScore, double userRating, double finalScore) {
         this.eventId = eventId;
         this.eventName = eventName;
-        this.score = score;
+        this.bannerUrl = bannerUrl;
+        this.greenScore = greenScore;
+        this.userRating = userRating;
+        this.finalScore = finalScore;
     }
 
-    // Getters
+    // Getters and Setters
     public String getEventId() {
         return eventId;
+    }
+
+    public void setEventId(String eventId) {
+        this.eventId = eventId;
     }
 
     public String getEventName() {
         return eventName;
     }
 
-    public double getScore() {
-        return score;
-    }
-
-    public int getRank() {
-        return rank;
-    }
-
-    // Setters
-    public void setEventId(String eventId) {
-        this.eventId = eventId;
-    }
-
     public void setEventName(String eventName) {
         this.eventName = eventName;
     }
 
-    public void setScore(double score) {
-        this.score = score;
+    public String getBannerUrl() {
+        return bannerUrl;
+    }
+
+    public void setBannerUrl(String bannerUrl) {
+        this.bannerUrl = bannerUrl;
+    }
+
+    public double getGreenScore() {
+        return greenScore;
+    }
+
+    public void setGreenScore(double greenScore) {
+        this.greenScore = greenScore;
+    }
+
+    public double getUserRating() {
+        return userRating;
+    }
+
+    public void setUserRating(double userRating) {
+        this.userRating = userRating;
+    }
+
+    public double getFinalScore() {
+        return finalScore;
+    }
+
+    public void setFinalScore(double finalScore) {
+        this.finalScore = finalScore;
+    }
+
+    public int getRank() {
+        return rank;
     }
 
     public void setRank(int rank) {

@@ -5,11 +5,13 @@ import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.umeventplanner.LeaderboardEntry;
 import com.example.umeventplanner.R;
 
@@ -19,10 +21,16 @@ public class LeaderboardAdapter extends RecyclerView.Adapter<LeaderboardAdapter.
 
     private Context context;
     private List<LeaderboardEntry> leaderboardEntries;
+    private OnLeaderboardClickListener listener;
 
-    public LeaderboardAdapter(Context context, List<LeaderboardEntry> leaderboardEntries) {
+    public interface OnLeaderboardClickListener {
+        void onEventClick(String eventId);
+    }
+
+    public LeaderboardAdapter(Context context, List<LeaderboardEntry> leaderboardEntries, OnLeaderboardClickListener listener) {
         this.context = context;
         this.leaderboardEntries = leaderboardEntries;
+        this.listener = listener;
     }
 
     @NonNull
@@ -35,9 +43,21 @@ public class LeaderboardAdapter extends RecyclerView.Adapter<LeaderboardAdapter.
     @Override
     public void onBindViewHolder(@NonNull LeaderboardViewHolder holder, int position) {
         LeaderboardEntry entry = leaderboardEntries.get(position);
-        holder.tvOrganizerName.setText(entry.getEventName());
-        holder.tvScore.setText(String.format("%.1f pts", entry.getScore()));
+
         holder.tvRank.setText(String.valueOf(entry.getRank()));
+        holder.tvEventName.setText(entry.getEventName());
+        holder.tvScores.setText(String.format("Green: %.1f ★ | User: %.1f ★", entry.getGreenScore(), entry.getUserRating()));
+        holder.tvFinalScore.setText(String.format("%.1f", entry.getFinalScore()));
+
+        if (entry.getBannerUrl() != null && !entry.getBannerUrl().isEmpty()) {
+            Glide.with(context).load(entry.getBannerUrl()).into(holder.ivEventBanner);
+        }
+
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onEventClick(entry.getEventId());
+            }
+        });
 
         switch (entry.getRank()) {
             case 1:
@@ -61,13 +81,16 @@ public class LeaderboardAdapter extends RecyclerView.Adapter<LeaderboardAdapter.
     }
 
     public static class LeaderboardViewHolder extends RecyclerView.ViewHolder {
-        TextView tvRank, tvOrganizerName, tvScore;
+        TextView tvRank, tvEventName, tvScores, tvFinalScore;
+        ImageView ivEventBanner;
 
         public LeaderboardViewHolder(@NonNull View itemView) {
             super(itemView);
             tvRank = itemView.findViewById(R.id.tvRank);
-            tvOrganizerName = itemView.findViewById(R.id.tvOrganizerName);
-            tvScore = itemView.findViewById(R.id.tvScore);
+            tvEventName = itemView.findViewById(R.id.tvEventName);
+            tvScores = itemView.findViewById(R.id.tvScores);
+            tvFinalScore = itemView.findViewById(R.id.tvFinalScore);
+            ivEventBanner = itemView.findViewById(R.id.ivEventBanner);
         }
     }
 }

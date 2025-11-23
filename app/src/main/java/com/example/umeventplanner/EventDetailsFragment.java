@@ -2,7 +2,6 @@ package com.example.umeventplanner;
 
 import android.app.Dialog;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,7 +35,6 @@ import java.util.Map;
 
 public class EventDetailsFragment extends Fragment implements PosterDisplayAdapter.OnPosterClickListener {
 
-    private static final String TAG = "EventDetailsFragment";
     private static final String EVENTS_COLLECTION = "events";
     private static final String USERS_COLLECTION = "users";
 
@@ -140,27 +138,13 @@ public class EventDetailsFragment extends Fragment implements PosterDisplayAdapt
                         }
                     }
 
-                    // *** DEBUGGING STARTS HERE ***
-                    if (mAuth.getCurrentUser() != null) {
-                        String currentUserUid = mAuth.getCurrentUser().getUid();
-                        List<String> plannerUids = event.getPlannerUIDs();
-                        Log.d(TAG, "Current User UID: " + currentUserUid);
-                        Log.d(TAG, "Planner UIDs from event: " + (plannerUids != null ? plannerUids.toString() : "null"));
-
-                        if (plannerUids != null && plannerUids.contains(currentUserUid)) {
-                            Log.d(TAG, "User is a planner. Showing ratings.");
-                            tvRatingsHeader.setVisibility(View.VISIBLE);
-                            rbAverageRating.setVisibility(View.VISIBLE);
-                            rvComments.setVisibility(View.VISIBLE);
-                            rbAverageRating.setRating((float) event.getAverageRating());
-                            loadComments();
-                        } else {
-                            Log.d(TAG, "User is NOT a planner. Hiding ratings.");
-                        }
-                    } else {
-                        Log.d(TAG, "Not logged in. Hiding ratings.");
+                    if (mAuth.getCurrentUser() != null && event.getPlannerUIDs() != null && event.getPlannerUIDs().contains(mAuth.getCurrentUser().getUid())) {
+                        tvRatingsHeader.setVisibility(View.VISIBLE);
+                        rbAverageRating.setVisibility(View.VISIBLE);
+                        rvComments.setVisibility(View.VISIBLE);
+                        rbAverageRating.setRating((float) event.getAverageRating());
+                        loadComments();
                     }
-                    // *** DEBUGGING ENDS HERE ***
                 }
             }
         });

@@ -17,6 +17,7 @@ public class Event implements Serializable {
     private String endTime;
     private String location;
     private int maxParticipants;
+    private int currentParticipants = 0;
     private String bannerUrl;
     private List<String> posterUrls;
     private float sustainabilityScore;
@@ -27,7 +28,6 @@ public class Event implements Serializable {
     private List<String> categories;
     private double ratingSum = 0.0;
     private int ratingCount = 0;
-    private int currentParticipants = 0; // New field
 
     public Event() {
         // Default constructor for Firestore
@@ -46,6 +46,7 @@ public class Event implements Serializable {
     public String getEndTime() { return endTime; }
     public String getLocation() { return location; }
     public int getMaxParticipants() { return maxParticipants; }
+    public int getCurrentParticipants() { return currentParticipants; }
     public String getBannerUrl() { return bannerUrl; }
     public List<String> getPosterUrls() { return posterUrls; }
     public float getSustainabilityScore() { return sustainabilityScore; }
@@ -56,7 +57,6 @@ public class Event implements Serializable {
     public List<String> getCategories() { return categories; }
     public double getRatingSum() { return ratingSum; }
     public int getRatingCount() { return ratingCount; }
-    public int getCurrentParticipants() { return currentParticipants; } // Getter for new field
 
     // Setters
     public void setEventId(String eventId) { this.eventId = eventId; }
@@ -67,6 +67,7 @@ public class Event implements Serializable {
     public void setEndTime(String endTime) { this.endTime = endTime; }
     public void setLocation(String location) { this.location = location; }
     public void setMaxParticipants(int maxParticipants) { this.maxParticipants = maxParticipants; }
+    public void setCurrentParticipants(int currentParticipants) { this.currentParticipants = currentParticipants; }
     public void setBannerUrl(String bannerUrl) { this.bannerUrl = bannerUrl; }
     public void setPosterUrls(List<String> posterUrls) { this.posterUrls = posterUrls; }
     public void setSustainabilityScore(float sustainabilityScore) { this.sustainabilityScore = sustainabilityScore; }
@@ -77,8 +78,8 @@ public class Event implements Serializable {
     public void setCategories(List<String> categories) { this.categories = categories; }
     public void setRatingSum(double ratingSum) { this.ratingSum = ratingSum; }
     public void setRatingCount(int ratingCount) { this.ratingCount = ratingCount; }
-    public void setCurrentParticipants(int currentParticipants) { this.currentParticipants = currentParticipants; } // Setter for new field
 
+    // Helper method
     public double getAverageRating() {
         return ratingCount == 0 ? 0.0 : ratingSum / ratingCount;
     }
