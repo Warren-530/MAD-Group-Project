@@ -31,6 +31,11 @@ import java.util.Map;
 
 public class EventDetailsFragment extends Fragment implements PosterDisplayAdapter.OnPosterClickListener {
 
+    // Constants for Firestore paths
+    private static final String APP_ID = "um_event_planner"; // Use your actual App ID
+    private static final String EVENTS_COLLECTION = "artifacts/" + APP_ID + "/public/data/events";
+    private static final String USERS_COLLECTION = "artifacts/" + APP_ID + "/users";
+
     private String eventId;
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
@@ -67,10 +72,8 @@ public class EventDetailsFragment extends Fragment implements PosterDisplayAdapt
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_event_details, container, false);
         initViews(view);
-        if (eventId != null) {
-            loadEventDetails();
-            checkRegistrationStatus();
-        }
+        loadEventDetails();
+        checkRegistrationStatus();
         return view;
     }
 
@@ -89,7 +92,8 @@ public class EventDetailsFragment extends Fragment implements PosterDisplayAdapt
     }
 
     private void loadEventDetails() {
-        db.collection("events").document(eventId).get().addOnSuccessListener(documentSnapshot -> {
+        if (eventId == null) return;
+        db.collection(EVENTS_COLLECTION).document(eventId).get().addOnSuccessListener(documentSnapshot -> {
             if (documentSnapshot.exists()) {
                 Event event = documentSnapshot.toObject(Event.class);
                 if (event != null && getContext() != null) {
@@ -111,7 +115,7 @@ public class EventDetailsFragment extends Fragment implements PosterDisplayAdapt
                     }
                     tvImpactLabel.setText(adoptedPractices + "/25 Practices Adopted");
 
-                    if (event.getPosterUrls() != null) {
+                    if (getContext() != null && event.getPosterUrls() != null) {
                         rvPosterCarousel.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
                         PosterDisplayAdapter adapter = new PosterDisplayAdapter(getContext(), event.getPosterUrls(), this);
                         rvPosterCarousel.setAdapter(adapter);
@@ -133,9 +137,9 @@ public class EventDetailsFragment extends Fragment implements PosterDisplayAdapt
     }
 
     private void checkRegistrationStatus() {
-        if (mAuth.getCurrentUser() == null) return;
+        if (eventId == null || mAuth.getCurrentUser() == null) return;
         String userId = mAuth.getCurrentUser().getUid();
-        db.collection("users").document(userId).collection("registrations").document(eventId).get()
+        db.collection(USERS_COLLECTION).document(userId).collection("registrations").document(eventId).get()
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
                         btnRegister.setText("View Ticket");
@@ -151,8 +155,8 @@ public class EventDetailsFragment extends Fragment implements PosterDisplayAdapt
 
     private void registerForEvent() {
         String userId = mAuth.getCurrentUser().getUid();
-        final DocumentReference eventRef = db.collection("events").document(eventId);
-        final DocumentReference userRegistrationRef = db.collection("users").document(userId).collection("registrations").document(eventId);
+        final DocumentReference eventRef = db.collection(EVENTS_COLLECTION).document(eventId);
+        final DocumentReference userRegistrationRef = db.collection(USERS_COLLECTION).document(userId).collection("registrations").document(eventId);
 
         db.runTransaction(transaction -> {
             DocumentSnapshot eventSnapshot = transaction.get(eventRef);
@@ -167,7 +171,7 @@ public class EventDetailsFragment extends Fragment implements PosterDisplayAdapt
                 transaction.set(userRegistrationRef, registrationData);
                 return true;
             } else {
-                return false;
+                return false; // Event is full or maxParticipants not set
             }
         }).addOnSuccessListener(success -> {
             if (success) {
