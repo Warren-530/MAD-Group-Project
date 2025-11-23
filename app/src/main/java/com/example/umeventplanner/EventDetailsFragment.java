@@ -193,6 +193,7 @@ public class EventDetailsFragment extends Fragment implements PosterDisplayAdapt
             if (userDoc.exists()) {
                 String userName = userDoc.getString("name");
                 String userEmail = userDoc.getString("email");
+                String userMatric = userDoc.getString("matricNo");
 
                 final DocumentReference eventRef = db.collection(EVENTS_COLLECTION).document(eventId);
                 final DocumentReference userRegistrationRef = db.collection(USERS_COLLECTION).document(userId).collection("registrations").document(eventId);
@@ -213,6 +214,7 @@ public class EventDetailsFragment extends Fragment implements PosterDisplayAdapt
                             eventRegData.put("timestamp", com.google.firebase.Timestamp.now());
                             eventRegData.put("userName", userName);
                             eventRegData.put("userEmail", userEmail);
+                            eventRegData.put("userMatric", userMatric);
                             transaction.set(eventRegistrationRef, eventRegData);
 
                             return true;
