@@ -1,6 +1,7 @@
 package com.example.umeventplanner;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,12 +14,18 @@ import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 public class PlannerDashboardFragment extends Fragment {
+
+    private static final String TAG = "PlannerDashboard";
 
     private TextView tvWelcome, tvTotalEvents, tvAvgScore, tvResourcesSaved;
     private TextView tvUpcomingEventTitle, tvUpcomingEventDate, tvUpcomingEventTime, tvUpcomingEventLocation, tvNoEvents;
@@ -37,7 +44,19 @@ public class PlannerDashboardFragment extends Fragment {
         db = FirebaseFirestore.getInstance();
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
 
-        // Initialize Views
+        initViews(view);
+
+        btnCreateEvent.setOnClickListener(v -> getParentFragmentManager().beginTransaction()
+                .replace(R.id.fragment_container, new CreateEventFragment())
+                .addToBackStack(null)
+                .commit());
+
+        loadDashboardData();
+
+        return view;
+    }
+
+    private void initViews(View view) {
         tvWelcome = view.findViewById(R.id.tvWelcome);
         tvTotalEvents = view.findViewById(R.id.tvTotalEvents);
         tvAvgScore = view.findViewById(R.id.tvAvgScore);
@@ -50,71 +69,88 @@ public class PlannerDashboardFragment extends Fragment {
         btnCreateEvent = view.findViewById(R.id.btnCreateEvent);
         cardUpcomingEvent = view.findViewById(R.id.cardUpcomingEvent);
         progressBar = view.findViewById(R.id.progressBar);
-
-        btnCreateEvent.setOnClickListener(v -> getParentFragmentManager().beginTransaction()
-                .replace(R.id.fragment_container, new CreateEventFragment())
-                .addToBackStack(null)
-                .commit());
-
-        loadDashboardData();
-
-        return view;
     }
 
     private void loadDashboardData() {
         progressBar.setVisibility(View.VISIBLE);
 
-        if (currentUser != null) {
-            // Load User Stats
-            db.collection("users").document(currentUser.getUid()).get().addOnSuccessListener(documentSnapshot -> {
-                if (documentSnapshot.exists()) {
-                    String name = documentSnapshot.getString("name");
-                    tvWelcome.setText("Welcome, " + name + "!");
+        if (currentUser == null) return;
 
-                    if (documentSnapshot.contains("myImpact")) {
-                        DocumentSnapshot impactMap = (DocumentSnapshot) documentSnapshot.get("myImpact");
-                        if (impactMap != null && impactMap.exists()) {
-                            tvTotalEvents.setText(String.valueOf(impactMap.getLong("eventsCount")));
-                            tvAvgScore.setText(String.format("%.1f", impactMap.getDouble("avgScore")));
-                            // Assuming 'resourcesSaved' is a numeric value. Formatting may be needed.
-                            tvResourcesSaved.setText(String.valueOf(impactMap.getLong("resourcesSaved")));
-                        }
+        // Set welcome message immediately
+        db.collection("users").document(currentUser.getUid()).get().addOnSuccessListener(documentSnapshot -> {
+            if (documentSnapshot.exists()) {
+                String name = documentSnapshot.getString("name");
+                tvWelcome.setText("Welcome, " + name + "!");
+            }
+        });
+
+        // Fetch all events by the planner
+        db.collection("events").whereArrayContains("plannerUIDs", currentUser.getUid()).get()
+            .addOnSuccessListener(this::processEventResults)
+            .addOnFailureListener(e -> {
+                Log.e(TAG, "Error fetching events", e);
+                progressBar.setVisibility(View.GONE);
+                tvNoEvents.setVisibility(View.VISIBLE);
+                cardUpcomingEvent.setVisibility(View.GONE);
+            });
+    }
+
+    private void processEventResults(QuerySnapshot querySnapshot) {
+        if (querySnapshot == null || querySnapshot.isEmpty()) {
+            tvTotalEvents.setText("0");
+            tvAvgScore.setText("0.0");
+            tvResourcesSaved.setText("0");
+            tvNoEvents.setVisibility(View.VISIBLE);
+            cardUpcomingEvent.setVisibility(View.GONE);
+            progressBar.setVisibility(View.GONE);
+            return;
+        }
+
+        // 1. Dynamic Stats Calculation
+        int totalEvents = querySnapshot.size();
+        double totalScore = 0;
+        tvTotalEvents.setText(String.valueOf(totalEvents));
+
+        Event nearestEvent = null;
+        Date nearestDate = null;
+        Date today = new Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+
+        for (QueryDocumentSnapshot doc : querySnapshot) {
+            Event event = doc.toObject(Event.class);
+            totalScore += event.getSustainabilityScore();
+
+            // 2. Find Next Upcoming Event
+            try {
+                Date eventDate = sdf.parse(event.getDate());
+                if (eventDate != null && (eventDate.after(today) || sdf.format(eventDate).equals(sdf.format(today)))) {
+                    if (nearestEvent == null || eventDate.before(nearestDate)) {
+                        nearestDate = eventDate;
+                        nearestEvent = event;
                     }
                 }
-            });
-
-            // Load Upcoming Event
-            db.collection("events")
-                    .whereArrayContains("plannerUIDs", currentUser.getUid())
-                    .whereGreaterThanOrEqualTo("date", new Date())
-                    .orderBy("date", Query.Direction.ASCENDING)
-                    .limit(1)
-                    .get()
-                    .addOnSuccessListener(queryDocumentSnapshots -> {
-                        if (!queryDocumentSnapshots.isEmpty()) {
-                            DocumentSnapshot eventDoc = queryDocumentSnapshots.getDocuments().get(0);
-                            Event event = eventDoc.toObject(Event.class);
-                            if (event != null) {
-                                tvUpcomingEventTitle.setText(event.getTitle());
-                                // Assuming date is a string that needs parsing for time
-                                String[] dateTime = event.getDate().split(" ");
-                                tvUpcomingEventDate.setText(dateTime.length > 0 ? dateTime[0] : "");
-                                tvUpcomingEventTime.setText(dateTime.length > 1 ? dateTime[1] : "");
-                                tvUpcomingEventLocation.setText(event.getLocation());
-                                cardUpcomingEvent.setVisibility(View.VISIBLE);
-                                tvNoEvents.setVisibility(View.GONE);
-                            }
-                        } else {
-                            tvNoEvents.setVisibility(View.VISIBLE);
-                            cardUpcomingEvent.setVisibility(View.GONE);
-                        }
-                        progressBar.setVisibility(View.GONE);
-                    })
-                    .addOnFailureListener(e -> {
-                        progressBar.setVisibility(View.GONE);
-                        tvNoEvents.setVisibility(View.VISIBLE);
-                        cardUpcomingEvent.setVisibility(View.GONE);
-                    });
+            } catch (ParseException e) {
+                Log.e(TAG, "Error parsing date for event: " + event.getTitle(), e);
+            }
         }
+
+        double avgScore = totalEvents > 0 ? totalScore / totalEvents : 0.0;
+        tvAvgScore.setText(String.format(Locale.US, "%.1f", avgScore));
+        tvResourcesSaved.setText(String.valueOf(totalEvents * 20)); // Example calculation
+
+        // 3. Update UI
+        if (nearestEvent != null) {
+            tvUpcomingEventTitle.setText(nearestEvent.getTitle());
+            tvUpcomingEventDate.setText(nearestEvent.getDate());
+            tvUpcomingEventTime.setText(String.format("%s - %s", nearestEvent.getStartTime(), nearestEvent.getEndTime()));
+            tvUpcomingEventLocation.setText(nearestEvent.getLocation());
+            cardUpcomingEvent.setVisibility(View.VISIBLE);
+            tvNoEvents.setVisibility(View.GONE);
+        } else {
+            tvNoEvents.setVisibility(View.VISIBLE);
+            cardUpcomingEvent.setVisibility(View.GONE);
+        }
+
+        progressBar.setVisibility(View.GONE);
     }
 }

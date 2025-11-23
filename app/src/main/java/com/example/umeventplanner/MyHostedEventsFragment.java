@@ -69,7 +69,7 @@ public class MyHostedEventsFragment extends Fragment implements HostedEventAdapt
     }
 
     private void setupTabLayout() {
-        // The tabs are now defined in XML, so we only add the listener.
+        // The tabs are defined in the XML, so we only add the listener.
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
@@ -89,63 +89,64 @@ public class MyHostedEventsFragment extends Fragment implements HostedEventAdapt
         if (mAuth.getCurrentUser() == null) return;
         String currentUserId = mAuth.getCurrentUser().getUid();
 
-        db.collection("events").whereArrayContains("plannerUIDs", currentUserId)
-            .get()
-            .addOnSuccessListener(queryDocumentSnapshots -> {
-                eventList.clear();
-                Date today = new Date();
-                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+        Query query = db.collection("events").whereArrayContains("plannerUIDs", currentUserId);
 
-                for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
-                    Event event = document.toObject(Event.class);
-                    if (event != null) {
-                        event.setEventId(document.getId());
-                        boolean addEvent = false;
-                        try {
-                            Date eventDate = sdf.parse(event.getDate());
-                            switch (statusFilter) {
-                                case "Upcoming":
-                                    if ("Published".equals(event.getStatus()) && (eventDate.after(today) || sdf.format(eventDate).equals(sdf.format(today)))) {
-                                        addEvent = true;
-                                    }
-                                    break;
-                                case "Past":
-                                    if ("Published".equals(event.getStatus()) && eventDate.before(today) && !sdf.format(eventDate).equals(sdf.format(today))) {
-                                        addEvent = true;
-                                    }
-                                    break;
-                                case "Drafts":
-                                    if ("Draft".equals(event.getStatus())) {
-                                        addEvent = true;
-                                    }
-                                    break;
-                            }
-                        } catch (ParseException e) {
-                            e.printStackTrace();
+        // This query now matches the index you created: plannerUIDs (array) and date (ascending)
+        query.orderBy("date").get().addOnSuccessListener(queryDocumentSnapshots -> {
+            eventList.clear();
+            Date today = new Date();
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+
+            for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                Event event = document.toObject(Event.class);
+                if (event != null) {
+                    event.setEventId(document.getId());
+                    boolean addEvent = false;
+                    try {
+                        Date eventDate = sdf.parse(event.getDate());
+                        switch (statusFilter) {
+                            case "Upcoming":
+                                if ("Published".equals(event.getStatus()) && (eventDate.after(today) || sdf.format(eventDate).equals(sdf.format(today)))) {
+                                    addEvent = true;
+                                }
+                                break;
+                            case "Past":
+                                if ("Published".equals(event.getStatus()) && eventDate.before(today) && !sdf.format(eventDate).equals(sdf.format(today))) {
+                                    addEvent = true;
+                                }
+                                break;
+                            case "Drafts":
+                                if ("Draft".equals(event.getStatus())) {
+                                    addEvent = true;
+                                }
+                                break;
                         }
-                        if (addEvent) {
-                            eventList.add(event);
-                        }
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
+                    if (addEvent) {
+                        eventList.add(event);
                     }
                 }
-                adapter.notifyDataSetChanged();
-                progressBar.setVisibility(View.GONE);
-                tvEmptyState.setVisibility(eventList.isEmpty() ? View.VISIBLE : View.GONE);
-            }).addOnFailureListener(e -> {
-                progressBar.setVisibility(View.GONE);
-                tvEmptyState.setVisibility(View.VISIBLE);
-                Toast.makeText(getContext(), "Error loading events: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-            });
+            }
+            adapter.notifyDataSetChanged();
+            progressBar.setVisibility(View.GONE);
+            tvEmptyState.setVisibility(eventList.isEmpty() ? View.VISIBLE : View.GONE);
+        }).addOnFailureListener(e -> {
+            progressBar.setVisibility(View.GONE);
+            tvEmptyState.setVisibility(View.VISIBLE);
+            Toast.makeText(getContext(), "Error loading events: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        });
     }
 
     @Override
     public void onEventClick(Event event) {
         if (event != null && event.getEventId() != null) {
-            CreateEventFragment fragment = new CreateEventFragment();
+            EventManagementFragment fragment = new EventManagementFragment();
             Bundle args = new Bundle();
             args.putString("eventId", event.getEventId());
             fragment.setArguments(args);
-            
+
             getParentFragmentManager().beginTransaction()
                     .replace(R.id.fragment_container, fragment)
                     .addToBackStack(null)

@@ -3,19 +3,33 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:gravity="center_vertical">
 
     <TextView
-        android:id="@+id/tvEventName"
+        android:id="@+id/tvRank"
+        android:layout_width="30dp"
+        android:layout_height="wrap_content"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        android:text="1" />
+
+    <TextView
+        android:id="@+id/tvOrganizerName"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:textSize="18sp" />
+        android:layout_marginStart="16dp"
+        android:textSize="16sp"
+        android:text="Organizer Name" />
 
     <TextView
         android:id="@+id/tvScore"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="18sp" />
+        android:textStyle="bold"
+        android:textSize="16sp"
+        android:textColor="@android:color/holo_green_dark"
+        android:text="98 pts" />
 
 </LinearLayout>

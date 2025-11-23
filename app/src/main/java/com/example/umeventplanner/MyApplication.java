@@ -21,8 +21,9 @@ public class MyApplication extends Application {
     }
 
     private void initializeCloudinary() {
+        // This is the correct way to prevent re-initialization
         if (isCloudinaryInitialized) {
-            return; // Already initialized
+            return;
         }
 
         String cloudName = BuildConfig.CLOUDINARY_CLOUD_NAME;
@@ -31,7 +32,7 @@ public class MyApplication extends Application {
 
         if (TextUtils.isEmpty(cloudName) || TextUtils.isEmpty(apiKey) || TextUtils.isEmpty(apiSecret)) {
             Log.e(TAG, "FATAL ERROR: Cloudinary credentials not found. Please check your local.properties file.");
-            return;
+            return; // Do not initialize if keys are missing
         }
 
         Map<String, String> config = new HashMap<>();
@@ -39,8 +40,11 @@ public class MyApplication extends Application {
         config.put("api_key", apiKey);
         config.put("api_secret", apiSecret);
         
+        // Initialize the MediaManager
         MediaManager.init(this, config);
-        isCloudinaryInitialized = true; // Set flag after successful initialization
+        
+        // Set the flag to true only after a successful init
+        isCloudinaryInitialized = true; 
         Log.i(TAG, "Cloudinary SDK initialized successfully.");
     }
 }
