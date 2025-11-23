@@ -13,9 +13,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.umeventplanner.adapters.GuestAdapter;
-import com.google.android.gms.tasks.Task;
-import com.google.android.gms.tasks.Tasks;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
@@ -69,27 +66,16 @@ public class GuestListFragment extends Fragment {
     private void loadGuests() {
         progressBar.setVisibility(View.VISIBLE);
 
-        db.collection("users").get().addOnSuccessListener(usersSnapshot -> {
-            List<Task<DocumentSnapshot>> registrationTasks = new ArrayList<>();
-            List<User> allUsers = new ArrayList<>();
-
-            for (QueryDocumentSnapshot userDoc : usersSnapshot) {
-                User user = userDoc.toObject(User.class);
-                allUsers.add(user);
-                registrationTasks.add(db.collection("users").document(userDoc.getId()).collection("registrations").document(eventId).get());
-            }
-
-            Tasks.whenAllSuccess(registrationTasks).addOnSuccessListener(results -> {
-                guestList.clear();
-                for (int i = 0; i < results.size(); i++) {
-                    DocumentSnapshot registrationDoc = (DocumentSnapshot) results.get(i);
-                    if (registrationDoc.exists()) {
-                        guestList.add(allUsers.get(i));
+        db.collection("events").document(eventId).collection("registrations")
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    guestList.clear();
+                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                        User user = document.toObject(User.class);
+                        guestList.add(user);
                     }
-                }
-                adapter.notifyDataSetChanged();
-                progressBar.setVisibility(View.GONE);
-            });
-        });
+                    adapter.notifyDataSetChanged();
+                    progressBar.setVisibility(View.GONE);
+                });
     }
 }

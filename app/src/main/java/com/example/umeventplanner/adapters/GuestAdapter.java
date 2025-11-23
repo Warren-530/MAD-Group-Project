@@ -35,7 +35,7 @@ public class GuestAdapter extends RecyclerView.Adapter<GuestAdapter.GuestViewHol
     public void onBindViewHolder(@NonNull GuestViewHolder holder, int position) {
         User guest = guestList.get(position);
         holder.tvGuestName.setText(guest.getName());
-        holder.tvMatricNumber.setText(guest.getMatricNo());
+        holder.tvGuestEmail.setText(guest.getEmail()); // Assuming User has getEmail()
     }
 
     @Override
@@ -44,12 +44,12 @@ public class GuestAdapter extends RecyclerView.Adapter<GuestAdapter.GuestViewHol
     }
 
     public static class GuestViewHolder extends RecyclerView.ViewHolder {
-        TextView tvGuestName, tvMatricNumber;
+        TextView tvGuestName, tvGuestEmail;
 
         public GuestViewHolder(@NonNull View itemView) {
             super(itemView);
             tvGuestName = itemView.findViewById(R.id.tvGuestName);
-            tvMatricNumber = itemView.findViewById(R.id.tvMatricNumber);
+            tvGuestEmail = itemView.findViewById(R.id.tvGuestEmail);
         }
     }
 }

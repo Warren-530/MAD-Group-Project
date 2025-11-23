@@ -104,14 +104,15 @@ public class EventManagementFragment extends Fragment {
         cardQrCode.setOnClickListener(v -> showQrCodeDialog());
 
         cardGuests.setOnClickListener(v -> {
-            // TODO: Navigate to Guest List Fragment
+            GuestListFragment fragment = GuestListFragment.newInstance(eventId);
+            getParentFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_container, fragment)
+                    .addToBackStack(null)
+                    .commit();
         });
 
         cardForum.setOnClickListener(v -> {
-            ForumFragment fragment = new ForumFragment();
-            Bundle args = new Bundle();
-            args.putString("eventId", eventId);
-            fragment.setArguments(args);
+            FeedbackFragment fragment = FeedbackFragment.newInstance(eventId);
             getParentFragmentManager().beginTransaction()
                     .replace(R.id.fragment_container, fragment)
                     .addToBackStack(null)
