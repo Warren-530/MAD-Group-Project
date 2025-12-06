@@ -5,20 +5,52 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp"
+
+    android:background="@drawable/bottom_gradient"
     tools:context=".AccountActivity">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/Theme.UMEventPlanner.AppBarOverlay">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/white"
+            app:popupTheme="@style/Theme.UMEventPlanner.PopupOverlay" >
+
+            <ImageView
+                android:id="@+id/iv_backButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/back_icon"
+                android:padding="4dp"
+                android:layout_gravity="start"
+                app:tint="@color/primary_darkgreen"
+
+
+        </androidx.appcompat.widget.Toolbar>
+    </com.google.android.material.appbar.AppBarLayout>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Account Details"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:layout_marginBottom="24dp"/>
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="24dp"
+        android:layout_marginStart="16dp"
+        android:fontFamily="@font/poppins_semibold"
+        android:text= "Account Details"
+        android:textColor="@color/primary_darkgreen"
+        android:textSize="24sp" />
 
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
         android:hint="Name">
 
         <com.google.android.material.textfield.TextInputEditText
@@ -31,6 +63,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
         android:hint="Year of Study">
 
         <com.google.android.material.textfield.TextInputEditText
@@ -43,6 +77,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
         android:hint="Course">
 
         <com.google.android.material.textfield.TextInputEditText
@@ -55,6 +91,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
         android:hint="Matric Number">
 
         <com.google.android.material.textfield.TextInputEditText
@@ -68,13 +106,23 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
-        android:text="Enable Planner Mode" />
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:text="Enable Planner Mode"
+        android:textColor="@color/primary_darkgreen"
+        android:textSize="16sp"/>
 
     <Button
         android:id="@+id/btnUpdate"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
-        android:text="Update Profile" />
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:text="Update Profile"
+        android:textColor="@android:color/white"
+        app:backgroundTint="@color/primary_darkgreen"
+        app:cornerRadius="20dp" />
+
 
 </LinearLayout>

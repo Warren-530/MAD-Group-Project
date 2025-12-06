@@ -7,6 +7,12 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="primary_lightgreen">#C4EFCB</color>
+    <color name="primary_darkgreen">#2C593F</color>
+    <color name="primary_lightyellow">#E7F7B1</color>
+    <color name="primary_lightred">#E6CDAD</color>
+
+
     
     <!-- Sustainable Theme Colors -->
     <color name="green_primary">#4CAF50</color>
