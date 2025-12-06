@@ -7,7 +7,7 @@
     android:orientation="vertical"
     android:padding="24dp"
     android:gravity="center"
-    android:background="@color/background_light"
+    android:background="@drawable/bottom_gradient"
     tools:context=".LoginActivity">
 
     <ImageView
@@ -23,7 +23,7 @@
         android:text="Welcome Back"
         android:textSize="28sp"
         android:textStyle="bold"
-        android:textColor="@color/green_dark"
+        android:textColor="@color/primary_darkgreen"
         android:layout_marginBottom="8dp"/>
 
     <TextView
@@ -68,8 +68,9 @@
         android:layout_height="60dp"
         android:layout_marginTop="24dp"
         android:text="@string/login"
+        app:backgroundTint="@color/primary_darkgreen"
         android:textSize="16sp"
-        app:cornerRadius="8dp"/>
+        app:cornerRadius="10dp"/>
 
     <TextView
         android:id="@+id/tvRegister"
@@ -77,7 +78,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:text="Don't have an account? Register"
-        android:textColor="@color/green_primary"
+        android:textColor="@color/primary_darkgreen"
         android:textSize="16sp"/>
 
 </LinearLayout>
