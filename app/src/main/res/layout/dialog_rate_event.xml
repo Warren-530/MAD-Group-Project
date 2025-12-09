@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
@@ -9,6 +10,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:fontFamily="@font/poppins_semibold"
         android:text="Rate this Event"
         android:textSize="20sp"
         android:textStyle="bold" />
@@ -25,16 +27,20 @@
         android:id="@+id/etComment"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Add a comment (optional)"
-        android:minLines="3"
+        android:layout_marginTop="14dp"
+        android:fontFamily="@font/poppins_medium"
         android:gravity="top"
-        android:layout_marginTop="16dp" />
+        android:hint="Add a comment (optional)"
+        android:minLines="3" />
 
     <Button
         android:id="@+id/btnSubmitRating"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:backgroundTint="@color/primary_darkgreen"
+        android:fontFamily="@font/poppins_medium"
         android:text="Submit"
-        android:layout_marginTop="24dp" />
+        app:cornerRadius="10dp" />
 
 </LinearLayout>

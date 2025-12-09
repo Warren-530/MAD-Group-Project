@@ -35,16 +35,18 @@
                 android:id="@+id/tvTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textStyle="bold"
-                android:maxLines="1"
                 android:ellipsize="end"
+                android:fontFamily="@font/poppins_semibold"
+                android:maxLines="1"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                android:textStyle="bold"
                 tools:text="Event Title" />
 
             <TextView
                 android:id="@+id/tvDate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:fontFamily="@font/poppins_medium"
                 android:textSize="12sp"
                 tools:text="23/11/2025" />
 
@@ -52,6 +54,7 @@
                 android:id="@+id/tvLocation"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:fontFamily="@font/poppins_medium"
                 android:textSize="12sp"
                 tools:text="FCSIT, UM" />
 
@@ -61,9 +64,10 @@
             android:id="@+id/tvGreenScore"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textStyle="bold"
-            android:textColor="@color/green_dark"
             android:layout_marginStart="8dp"
+            android:fontFamily="@font/poppins_semibold"
+            android:textColor="@color/primary_darkgreen"
+            android:textStyle="bold"
             tools:text="4.5 ★" />
 
     </LinearLayout>

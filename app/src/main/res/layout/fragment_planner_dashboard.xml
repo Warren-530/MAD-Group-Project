@@ -27,9 +27,10 @@
             android:id="@+id/tvWelcome"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:fontFamily="@font/poppins_medium"
             android:text="Welcome, Planner!"
             android:textAppearance="@style/TextAppearance.AppCompat.Headline"
-            android:textColor="@color/green_primary"
+            android:textColor="@color/primary_darkgreen"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -39,8 +40,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
+            android:fontFamily="@font/poppins_semibold"
             android:text="Your Impact"
             android:textAppearance="@style/TextAppearance.AppCompat.Title"
+            android:textColor="@color/primary_darkgreen"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tvWelcome" />
 
@@ -72,14 +75,16 @@
                         android:id="@+id/tvTotalEvents"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:fontFamily="@font/poppins_semibold"
                         android:text="0"
                         android:textAppearance="@style/TextAppearance.AppCompat.Display1"
-                        android:textColor="@color/green_dark"
+                        android:textColor="@color/primary_darkgreen"
                         android:textStyle="bold" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:fontFamily="@font/poppins_medium"
                         android:text="Total Events" />
                 </LinearLayout>
 
@@ -94,14 +99,16 @@
                         android:id="@+id/tvAvgScore"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:fontFamily="@font/poppins_semibold"
                         android:text="0.0"
                         android:textAppearance="@style/TextAppearance.AppCompat.Display1"
-                        android:textColor="@color/green_dark"
+                        android:textColor="@color/primary_darkgreen"
                         android:textStyle="bold" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:fontFamily="@font/poppins_medium"
                         android:text="Avg Score" />
                 </LinearLayout>
 
@@ -116,14 +123,16 @@
                         android:id="@+id/tvResourcesSaved"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:fontFamily="@font/poppins_semibold"
                         android:text="0"
                         android:textAppearance="@style/TextAppearance.AppCompat.Display1"
-                        android:textColor="@color/green_dark"
+                        android:textColor="@color/primary_darkgreen"
                         android:textStyle="bold" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:fontFamily="@font/poppins_medium"
                         android:text="Items Saved" />
                 </LinearLayout>
             </LinearLayout>
@@ -134,6 +143,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
+            android:fontFamily="@font/poppins_medium"
             android:text="Quick Actions"
             android:textAppearance="@style/TextAppearance.AppCompat.Title"
             app:layout_constraintStart_toStartOf="parent"
@@ -144,10 +154,12 @@
             style="@style/Widget.AppCompat.Button.Colored"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:backgroundTint="@color/green_primary"
+            android:layout_marginTop="10dp"
+            android:backgroundTint="@color/primary_darkgreen"
+            android:fontFamily="@font/poppins_medium"
             android:text="Create New Event"
             android:textColor="@android:color/white"
+            app:cornerRadius="10dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tvQuickActionsTitle" />
@@ -157,6 +169,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
+            android:fontFamily="@font/poppins_medium"
             android:text="Next Upcoming Event"
             android:textAppearance="@style/TextAppearance.AppCompat.Title"
             app:layout_constraintStart_toStartOf="parent"

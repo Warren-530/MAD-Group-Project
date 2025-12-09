@@ -53,7 +53,8 @@
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etName"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/poppins_medium" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
@@ -68,7 +69,8 @@
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etYear"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/poppins_medium" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
@@ -83,7 +85,8 @@
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etCourse"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/poppins_medium" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
@@ -98,31 +101,33 @@
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etMatricNumber"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/poppins_medium" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.switchmaterial.SwitchMaterial
         android:id="@+id/swPlannerMode"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
         android:layout_marginStart="16dp"
+        android:layout_marginTop="24dp"
         android:layout_marginEnd="16dp"
+        android:fontFamily="@font/poppins_medium"
         android:text="Enable Planner Mode"
         android:textColor="@color/primary_darkgreen"
-        android:textSize="16sp"/>
+        android:textSize="16sp" />
 
     <Button
         android:id="@+id/btnUpdate"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
         android:layout_marginStart="16dp"
+        android:layout_marginTop="32dp"
         android:layout_marginEnd="16dp"
         android:text="Update Profile"
         android:textColor="@android:color/white"
         app:backgroundTint="@color/primary_darkgreen"
-        app:cornerRadius="20dp" />
+        app:cornerRadius="10dp" />
 
 
 </LinearLayout>

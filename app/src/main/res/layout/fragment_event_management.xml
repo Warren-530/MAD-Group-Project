@@ -28,8 +28,9 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
             android:layout_marginEnd="8dp"
-            android:textStyle="bold"
+            android:fontFamily="@font/poppins_semibold"
             android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+            android:textStyle="bold"
             app:layout_constraintEnd_toStartOf="@+id/chipStatus"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/ivBanner"
@@ -40,6 +41,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
+            android:fontFamily="@font/poppins_medium"
             app:layout_constraintStart_toStartOf="@id/tvTitle"
             app:layout_constraintTop_toBottomOf="@id/tvTitle"
             tools:text="23/11/2025 - FCSIT, UM" />
@@ -49,6 +51,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="16dp"
+            android:fontFamily="@font/poppins_medium"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/tvTitle"
             tools:text="Published" />
@@ -84,10 +87,12 @@
                         android:layout_width="48dp"
                         android:layout_height="48dp"
                         android:src="@android:drawable/ic_menu_edit" />
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
+                        android:fontFamily="@font/poppins_medium"
                         android:text="Edit Event" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -111,10 +116,12 @@
                         android:layout_width="48dp"
                         android:layout_height="48dp"
                         android:src="@android:drawable/ic_menu_gallery" />
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
+                        android:fontFamily="@font/poppins_medium"
                         android:text="Check-in QR" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -138,10 +145,12 @@
                         android:layout_width="48dp"
                         android:layout_height="48dp"
                         android:src="@android:drawable/ic_menu_myplaces" />
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
+                        android:fontFamily="@font/poppins_medium"
                         android:text="Guest List" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -165,10 +174,12 @@
                         android:layout_width="48dp"
                         android:layout_height="48dp"
                         android:src="@android:drawable/ic_menu_help" />
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
+                        android:fontFamily="@font/poppins_medium"
                         android:text="Announcements" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -180,14 +191,16 @@
             android:id="@+id/btnDeleteEvent"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
             android:layout_marginStart="16dp"
+            android:layout_marginTop="32dp"
             android:layout_marginEnd="16dp"
-            android:text="Delete Event"
             android:backgroundTint="@android:color/holo_red_dark"
-            app:layout_constraintTop_toBottomOf="@id/gridManagement"
+            android:fontFamily="@font/poppins_medium"
+            android:text="Delete Event"
+            app:cornerRadius="10dp"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintTop_toBottomOf="@id/gridManagement" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
