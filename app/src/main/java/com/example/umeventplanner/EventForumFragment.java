@@ -11,6 +11,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -28,7 +29,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-// Re-creating this file to ensure it's correctly compiled
 public class EventForumFragment extends Fragment {
 
     private String eventId;
@@ -38,6 +38,7 @@ public class EventForumFragment extends Fragment {
     private EditText etAnnouncement;
     private ImageButton btnSend;
     private View bottomLayout;
+    private Toolbar toolbar;
 
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
@@ -77,9 +78,12 @@ public class EventForumFragment extends Fragment {
             currentUserId = currentUser.getUid();
         }
 
+        toolbar = view.findViewById(R.id.toolbar_event_forum);
         rvAnnouncements = view.findViewById(R.id.rvAnnouncements);
         bottomLayout = view.findViewById(R.id.bottom_layout);
 
+        setupToolbar();
+        
         announcementList = new ArrayList<>();
         adapter = new AnnouncementAdapter(getContext(), announcementList, eventId, eventHostId);
         rvAnnouncements.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -97,6 +101,17 @@ public class EventForumFragment extends Fragment {
         }
 
         return view;
+    }
+
+    private void setupToolbar() {
+        db.collection("events").document(eventId).get().addOnSuccessListener(documentSnapshot -> {
+            if (documentSnapshot.exists()) {
+                String eventName = documentSnapshot.getString("title");
+                toolbar.setTitle(eventName + " Forum");
+            }
+        });
+
+        toolbar.setNavigationOnClickListener(v -> getParentFragmentManager().popBackStack());
     }
 
     private void loadAnnouncements() {

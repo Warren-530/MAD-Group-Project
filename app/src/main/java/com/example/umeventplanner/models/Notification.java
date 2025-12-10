@@ -1,33 +1,36 @@
 package com.example.umeventplanner.models;
 
-import com.google.firebase.Timestamp;
+import com.google.firebase.firestore.ServerTimestamp;
+import java.util.Date;
 
 public class Notification {
-
     private String notificationId;
     private String eventId;
-    private String eventTitle;
     private String message;
-    private Timestamp timestamp;
-    private NotificationType type;
+    private Date timestamp;
+    private boolean read;
+    private NotificationType type; // Changed from notificationType to type
 
     public enum NotificationType {
+        EVENT_REMINDER,
         NEW_ANNOUNCEMENT,
-        EVENT_REMINDER
+        EVENT_INVITATION,
+        EVENT_REMOVAL // Added this line
     }
 
-    public Notification() { }
+    public Notification() {
+        // Default constructor required for calls to DataSnapshot.getValue(Notification.class)
+    }
 
-    public Notification(String notificationId, String eventId, String eventTitle, String message, Timestamp timestamp, NotificationType type) {
+    public Notification(String notificationId, String eventId, String message, Date timestamp, boolean read, NotificationType type) {
         this.notificationId = notificationId;
         this.eventId = eventId;
-        this.eventTitle = eventTitle;
         this.message = message;
         this.timestamp = timestamp;
+        this.read = read;
         this.type = type;
     }
 
-    // Getters and Setters
     public String getNotificationId() {
         return notificationId;
     }
@@ -44,14 +47,6 @@ public class Notification {
         this.eventId = eventId;
     }
 
-    public String getEventTitle() {
-        return eventTitle;
-    }
-
-    public void setEventTitle(String eventTitle) {
-        this.eventTitle = eventTitle;
-    }
-
     public String getMessage() {
         return message;
     }
@@ -60,19 +55,28 @@ public class Notification {
         this.message = message;
     }
 
-    public Timestamp getTimestamp() {
+    @ServerTimestamp
+    public Date getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(Timestamp timestamp) {
+    public void setTimestamp(Date timestamp) {
         this.timestamp = timestamp;
     }
 
-    public NotificationType getType() {
+    public boolean isRead() {
+        return read;
+    }
+
+    public void setRead(boolean read) {
+        this.read = read;
+    }
+
+    public NotificationType getType() { // Changed from getNotificationType to getType
         return type;
     }
 
-    public void setType(NotificationType type) {
+    public void setType(NotificationType type) { // Changed from setNotificationType to setType
         this.type = type;
     }
 }

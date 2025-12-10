@@ -163,6 +163,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     selectedFragment = new MyHostedEventsFragment();
                 } else if (itemId == R.id.nav_create_event) {
                     selectedFragment = new CreateEventFragment();
+                } else if (itemId == R.id.nav_notifications) {
+                    selectedFragment = new NotificationsFragment();
                 } else if (itemId == R.id.nav_forum) {
                     selectedFragment = new ForumFragment();
                 }
