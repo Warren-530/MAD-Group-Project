@@ -12,6 +12,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -162,6 +164,16 @@ public class MyHostedEventsFragment extends Fragment implements HostedEventAdapt
                 .setPositiveButton("Delete", (dialog, which) -> deleteEvent(event))
                 .setNegativeButton(android.R.string.no, null)
                 .show();
+    }
+
+    @Override
+    public void onOpenForum(Event event) {
+        FragmentManager fragmentManager = getParentFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        // Set isPlannerView to true
+        fragmentTransaction.replace(R.id.fragment_container, ForumFragment.newInstance(event.getEventId(), event.getPlannerId(), true));
+        fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.commit();
     }
 
     private void deleteEvent(Event event) {

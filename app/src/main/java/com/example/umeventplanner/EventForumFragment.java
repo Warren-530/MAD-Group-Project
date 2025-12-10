@@ -28,8 +28,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-// Corrected version with isPlannerView flag
-public class ForumFragment extends Fragment {
+// Re-creating this file to ensure it's correctly compiled
+public class EventForumFragment extends Fragment {
 
     private String eventId;
     private RecyclerView rvAnnouncements;
@@ -45,8 +45,8 @@ public class ForumFragment extends Fragment {
     private String eventHostId;
     private boolean isPlannerView;
 
-    public static ForumFragment newInstance(String eventId, String eventHostId, boolean isPlannerView) {
-        ForumFragment fragment = new ForumFragment();
+    public static EventForumFragment newInstance(String eventId, String eventHostId, boolean isPlannerView) {
+        EventForumFragment fragment = new EventForumFragment();
         Bundle args = new Bundle();
         args.putString("eventId", eventId);
         args.putString("eventHostId", eventHostId);
@@ -68,7 +68,7 @@ public class ForumFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_forum, container, false);
+        View view = inflater.inflate(R.layout.fragment_event_forum, container, false);
 
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();

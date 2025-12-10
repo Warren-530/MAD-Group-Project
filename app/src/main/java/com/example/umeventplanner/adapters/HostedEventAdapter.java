@@ -4,6 +4,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
@@ -22,6 +23,7 @@ public class HostedEventAdapter extends RecyclerView.Adapter<HostedEventAdapter.
     public interface OnHostedEventClickListener {
         void onEventClick(Event event);
         void onEventLongClick(Event event);
+        void onOpenForum(Event event);
     }
 
     public HostedEventAdapter(Context context, List<Event> eventList, OnHostedEventClickListener onHostedEventClickListener) {
@@ -33,7 +35,7 @@ public class HostedEventAdapter extends RecyclerView.Adapter<HostedEventAdapter.
     @NonNull
     @Override
     public HostedEventViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.item_event, parent, false);
+        View view = LayoutInflater.from(context).inflate(R.layout.item_hosted_event, parent, false);
         return new HostedEventViewHolder(view);
     }
 
@@ -51,7 +53,6 @@ public class HostedEventAdapter extends RecyclerView.Adapter<HostedEventAdapter.
                 .load(event.getBannerUrl())
                 .into(holder.ivEventImage);
         } else {
-            // Optional: Set a default image if no banner is available
             holder.ivEventImage.setImageResource(android.R.drawable.ic_menu_gallery);
         }
 
@@ -65,7 +66,13 @@ public class HostedEventAdapter extends RecyclerView.Adapter<HostedEventAdapter.
             if (onHostedEventClickListener != null) {
                 onHostedEventClickListener.onEventLongClick(event);
             }
-            return true; // Consume the long click
+            return true;
+        });
+
+        holder.btnForum.setOnClickListener(v -> {
+            if (onHostedEventClickListener != null) {
+                onHostedEventClickListener.onOpenForum(event);
+            }
         });
     }
 
@@ -77,6 +84,7 @@ public class HostedEventAdapter extends RecyclerView.Adapter<HostedEventAdapter.
     static class HostedEventViewHolder extends RecyclerView.ViewHolder {
         ImageView ivEventImage;
         TextView tvEventTitle, tvEventDate, tvEventLocation, tvGreenScore;
+        Button btnForum;
 
         HostedEventViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -85,6 +93,7 @@ public class HostedEventAdapter extends RecyclerView.Adapter<HostedEventAdapter.
             tvEventDate = itemView.findViewById(R.id.tvEventDate);
             tvEventLocation = itemView.findViewById(R.id.tvEventLocation);
             tvGreenScore = itemView.findViewById(R.id.tvGreenScore);
+            btnForum = itemView.findViewById(R.id.btnForum);
         }
     }
 }

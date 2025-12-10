@@ -28,6 +28,7 @@ public class TicketAdapter extends RecyclerView.Adapter<TicketAdapter.TicketView
     public interface OnTicketActionListener {
         void onScanQr(Ticket ticket);
         void onRateEvent(Ticket ticket);
+        void onOpenForum(Ticket ticket);
     }
 
     public TicketAdapter(Context context, List<Ticket> ticketList, OnTicketActionListener listener) {
@@ -67,6 +68,8 @@ public class TicketAdapter extends RecyclerView.Adapter<TicketAdapter.TicketView
             holder.btnAction.setText("Scan Check-in QR");
             holder.btnAction.setOnClickListener(v -> listener.onScanQr(ticket));
         }
+
+        holder.btnForum.setOnClickListener(v -> listener.onOpenForum(ticket));
     }
 
     @Override
@@ -77,7 +80,7 @@ public class TicketAdapter extends RecyclerView.Adapter<TicketAdapter.TicketView
     public static class TicketViewHolder extends RecyclerView.ViewHolder {
         ImageView ivBanner;
         TextView tvStatus, tvTitle, tvDateLocation;
-        Button btnAction;
+        Button btnAction, btnForum;
 
         public TicketViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -86,6 +89,7 @@ public class TicketAdapter extends RecyclerView.Adapter<TicketAdapter.TicketView
             tvTitle = itemView.findViewById(R.id.tvTitle);
             tvDateLocation = itemView.findViewById(R.id.tvDateLocation);
             btnAction = itemView.findViewById(R.id.btnAction);
+            btnForum = itemView.findViewById(R.id.btnForum);
         }
     }
 }

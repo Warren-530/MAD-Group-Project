@@ -15,6 +15,8 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -152,6 +154,16 @@ public class MyEventsFragment extends Fragment implements TicketAdapter.OnTicket
     @Override
     public void onRateEvent(Ticket ticket) {
         showRatingDialog(ticket.getEvent());
+    }
+
+    @Override
+    public void onOpenForum(Ticket ticket) {
+        FragmentManager fragmentManager = getParentFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        // Set isPlannerView to false
+        fragmentTransaction.replace(R.id.fragment_container, ForumFragment.newInstance(ticket.getEvent().getEventId(), ticket.getEvent().getPlannerId(), false));
+        fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.commit();
     }
 
     private void showRatingDialog(Event event) {
