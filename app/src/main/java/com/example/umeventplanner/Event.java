@@ -83,4 +83,11 @@ public class Event implements Serializable {
     public double getAverageRating() {
         return ratingCount == 0 ? 0.0 : ratingSum / ratingCount;
     }
+
+    public String getPlannerId() {
+        if (plannerUIDs != null && !plannerUIDs.isEmpty()) {
+            return plannerUIDs.get(0);
+        }
+        return null;
+    }
 }

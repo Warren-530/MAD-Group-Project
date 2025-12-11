@@ -15,7 +15,8 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.umeventplanner.adapters.ForumAdapter;
+import com.example.umeventplanner.adapters.AnnouncementAdapter;
+import com.example.umeventplanner.models.Announcement;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -27,22 +28,29 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+// Corrected version with isPlannerView flag
 public class ForumFragment extends Fragment {
 
     private String eventId;
-    private RecyclerView rvPosts;
-    private ForumAdapter adapter;
-    private List<Post> postList;
-    private EditText etMessage;
+    private RecyclerView rvAnnouncements;
+    private AnnouncementAdapter adapter;
+    private List<Announcement> announcementList;
+    private EditText etAnnouncement;
     private ImageButton btnSend;
+    private View bottomLayout;
 
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
+    private String currentUserId;
+    private String eventHostId;
+    private boolean isPlannerView;
 
-    public static ForumFragment newInstance(String eventId) {
+    public static ForumFragment newInstance(String eventId, String eventHostId, boolean isPlannerView) {
         ForumFragment fragment = new ForumFragment();
         Bundle args = new Bundle();
         args.putString("eventId", eventId);
+        args.putString("eventHostId", eventHostId);
+        args.putBoolean("isPlannerView", isPlannerView);
         fragment.setArguments(args);
         return fragment;
     }
@@ -52,6 +60,8 @@ public class ForumFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             eventId = getArguments().getString("eventId");
+            eventHostId = getArguments().getString("eventHostId");
+            isPlannerView = getArguments().getBoolean("isPlannerView", false);
         }
     }
 
@@ -62,64 +72,76 @@ public class ForumFragment extends Fragment {
 
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser != null) {
+            currentUserId = currentUser.getUid();
+        }
 
-        rvPosts = view.findViewById(R.id.rvPosts);
-        etMessage = view.findViewById(R.id.etMessage);
-        btnSend = view.findViewById(R.id.btnSend);
+        rvAnnouncements = view.findViewById(R.id.rvAnnouncements);
+        bottomLayout = view.findViewById(R.id.bottom_layout);
 
-        postList = new ArrayList<>();
-        adapter = new ForumAdapter(getContext(), postList);
-        rvPosts.setLayoutManager(new LinearLayoutManager(getContext()));
-        rvPosts.setAdapter(adapter);
+        announcementList = new ArrayList<>();
+        adapter = new AnnouncementAdapter(getContext(), announcementList, eventId, eventHostId);
+        rvAnnouncements.setLayoutManager(new LinearLayoutManager(getContext()));
+        rvAnnouncements.setAdapter(adapter);
 
-        loadPosts();
+        loadAnnouncements();
 
-        btnSend.setOnClickListener(v -> postMessage());
+        if (isPlannerView) {
+            bottomLayout.setVisibility(View.VISIBLE);
+            etAnnouncement = view.findViewById(R.id.etAnnouncement);
+            btnSend = view.findViewById(R.id.btnSend);
+            btnSend.setOnClickListener(v -> postAnnouncement());
+        } else {
+            bottomLayout.setVisibility(View.GONE);
+        }
 
         return view;
     }
 
-    private void loadPosts() {
+    private void loadAnnouncements() {
         if (eventId == null) return;
 
-        getPostsCollection().orderBy("timestamp", Query.Direction.ASCENDING)
+        getAnnouncementsCollection().orderBy("timestamp", Query.Direction.DESCENDING)
                 .addSnapshotListener((snapshots, e) -> {
                     if (e != null) {
                         return;
                     }
-                    postList.clear();
-                    for (Post post : snapshots.toObjects(Post.class)) {
-                        postList.add(post);
+                    announcementList.clear();
+                    if (snapshots != null) {
+                        announcementList.addAll(snapshots.toObjects(Announcement.class));
                     }
                     adapter.notifyDataSetChanged();
-                    rvPosts.scrollToPosition(postList.size() - 1);
                 });
     }
 
-    private void postMessage() {
-        String message = etMessage.getText().toString().trim();
+    private void postAnnouncement() {
+        String message = etAnnouncement.getText().toString().trim();
         if (TextUtils.isEmpty(message)) {
             return;
         }
 
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser == null) return;
+        if (currentUser == null || !isPlannerView || !currentUser.getUid().equals(eventHostId)) {
+            Toast.makeText(getContext(), "Only the host can post announcements.", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         db.collection("users").document(currentUser.getUid()).get().addOnSuccessListener(userDoc -> {
             if (userDoc.exists()) {
                 String userName = userDoc.getString("name");
-                String postId = UUID.randomUUID().toString();
+                String announcementId = UUID.randomUUID().toString();
 
-                Post post = new Post(postId, currentUser.getUid(), userName, message, Timestamp.now());
+                Announcement announcement = new Announcement(announcementId, currentUser.getUid(), userName, message, Timestamp.now());
 
-                getPostsCollection().document(postId).set(post).addOnSuccessListener(aVoid -> {
-                    etMessage.setText("");
+                getAnnouncementsCollection().document(announcementId).set(announcement).addOnSuccessListener(aVoid -> {
+                    etAnnouncement.setText("");
                 });
             }
         });
     }
 
-    private CollectionReference getPostsCollection() {
-        return db.collection("events").document(eventId).collection("posts");
+    private CollectionReference getAnnouncementsCollection() {
+        return db.collection("events").document(eventId).collection("announcements");
     }
 }

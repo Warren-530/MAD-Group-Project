@@ -19,8 +19,11 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.example.umeventplanner.adapters.CommentAdapter;
+import com.example.umeventplanner.adapters.FeedbackAdapter;
 import com.example.umeventplanner.adapters.PosterDisplayAdapter;
+import com.example.umeventplanner.models.Feedback;
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
@@ -144,28 +147,40 @@ public class EventDetailsFragment extends Fragment implements PosterDisplayAdapt
                         rbAverageRating.setVisibility(View.VISIBLE);
                         rvComments.setVisibility(View.VISIBLE);
                         rbAverageRating.setRating((float) event.getAverageRating());
-                        loadComments();
+                        loadFeedback();
                     }
                 }
             }
         });
     }
 
-    private void loadComments() {
-        List<Comment> commentList = new ArrayList<>();
-        CommentAdapter commentAdapter = new CommentAdapter(getContext(), commentList);
+    private void loadFeedback() {
+        List<Feedback> feedbackList = new ArrayList<>();
+        FeedbackAdapter feedbackAdapter = new FeedbackAdapter(getContext(), feedbackList);
         rvComments.setLayoutManager(new LinearLayoutManager(getContext()));
-        rvComments.setAdapter(commentAdapter);
+        rvComments.setAdapter(feedbackAdapter);
 
         db.collection(EVENTS_COLLECTION).document(eventId).collection("comments")
                 .orderBy("timestamp", Query.Direction.DESCENDING)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
+                    List<Task<DocumentSnapshot>> userTasks = new ArrayList<>();
+                    List<Feedback> pendingFeedback = new ArrayList<>();
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
-                        Comment comment = document.toObject(Comment.class);
-                        commentList.add(comment);
+                        Feedback feedback = document.toObject(Feedback.class);
+                        pendingFeedback.add(feedback);
+                        userTasks.add(db.collection(USERS_COLLECTION).document(feedback.getUserId()).get());
                     }
-                    commentAdapter.notifyDataSetChanged();
+                    Tasks.whenAllSuccess(userTasks).addOnSuccessListener(userSnapshots -> {
+                        for (int i = 0; i < userSnapshots.size(); i++) {
+                            DocumentSnapshot userSnapshot = (DocumentSnapshot) userSnapshots.get(i);
+                            if (userSnapshot.exists()) {
+                                pendingFeedback.get(i).setAuthorName(userSnapshot.getString("name"));
+                            }
+                        }
+                        feedbackList.addAll(pendingFeedback);
+                        feedbackAdapter.notifyDataSetChanged();
+                    });
                 });
     }
 
@@ -193,7 +208,7 @@ public class EventDetailsFragment extends Fragment implements PosterDisplayAdapt
             if (userDoc.exists()) {
                 String userName = userDoc.getString("name");
                 String userEmail = userDoc.getString("email");
-                
+
                 final DocumentReference eventRef = db.collection(EVENTS_COLLECTION).document(eventId);
                 final DocumentReference userRegistrationRef = db.collection(USERS_COLLECTION).document(userId).collection("registrations").document(eventId);
                 final DocumentReference eventRegistrationRef = eventRef.collection("registrations").document(userId);
