@@ -8,19 +8,24 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.RatingBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.umeventplanner.adapters.TicketAdapter;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
+import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -51,6 +56,9 @@ public class MyEventsFragment extends Fragment implements TicketAdapter.OnTicket
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
     private String targetEventId;
+    private TabLayout tabLayout;
+    private ProgressBar progressBar;
+    private TextView tvEmptyState;
 
     private final ActivityResultLauncher<ScanOptions> barcodeLauncher = registerForActivityResult(new ScanContract(),
             result -> {
@@ -66,20 +74,49 @@ public class MyEventsFragment extends Fragment implements TicketAdapter.OnTicket
 
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
-        rvMyTickets = view.findViewById(R.id.rvMyTickets);
-        ticketList = new ArrayList<>();
 
-        rvMyTickets.setLayoutManager(new LinearLayoutManager(getContext()));
-        adapter = new TicketAdapter(getContext(), ticketList, this);
-        rvMyTickets.setAdapter(adapter);
-
-        loadMyTickets();
+        initViews(view);
+        setupTabLayout();
+        loadMyTickets("Ongoing");
 
         return view;
     }
 
-    private void loadMyTickets() {
-        if (mAuth.getCurrentUser() == null) return;
+    private void initViews(View view) {
+        rvMyTickets = view.findViewById(R.id.rvMyTickets);
+        tabLayout = view.findViewById(R.id.tabLayout);
+        progressBar = view.findViewById(R.id.progressBar);
+        tvEmptyState = view.findViewById(R.id.tvEmptyState);
+
+        ticketList = new ArrayList<>();
+        adapter = new TicketAdapter(getContext(), ticketList, this);
+        rvMyTickets.setLayoutManager(new LinearLayoutManager(getContext()));
+        rvMyTickets.setAdapter(adapter);
+    }
+
+    private void setupTabLayout() {
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                if (tab.getText() != null) {
+                    loadMyTickets(tab.getText().toString());
+                }
+            }
+            @Override public void onTabUnselected(TabLayout.Tab tab) { }
+            @Override public void onTabReselected(TabLayout.Tab tab) { }
+        });
+    }
+
+    private void loadMyTickets(String filter) {
+        progressBar.setVisibility(View.VISIBLE);
+        tvEmptyState.setVisibility(View.GONE);
+
+        if (mAuth.getCurrentUser() == null) {
+            progressBar.setVisibility(View.GONE);
+            tvEmptyState.setVisibility(View.VISIBLE);
+            return;
+        }
+
         String userId = mAuth.getCurrentUser().getUid();
 
         db.collection("users").document(userId).collection("registrations").get()
@@ -95,18 +132,35 @@ public class MyEventsFragment extends Fragment implements TicketAdapter.OnTicket
 
                     Tasks.whenAllSuccess(eventTasks).addOnSuccessListener(snapshots -> {
                         ticketList.clear();
+                        Date today = new Date();
+                        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+
                         for (Object snapshot : snapshots) {
                             DocumentSnapshot docSnap = (DocumentSnapshot) snapshot;
                             Event event = docSnap.toObject(Event.class);
                             if (event != null) {
                                 event.setEventId(docSnap.getId());
-                                String status = registrationStatusMap.get(docSnap.getId());
-                                ticketList.add(new Ticket(event, status != null ? status : "Registered"));
+                                boolean addEvent = false;
+                                try {
+                                    Date eventDate = sdf.parse(event.getDate());
+                                    if ("Ongoing".equals(filter) && !eventDate.before(today)) {
+                                        addEvent = true;
+                                    } else if ("Past".equals(filter) && eventDate.before(today)) {
+                                        addEvent = true;
+                                    }
+                                } catch (ParseException e) {
+                                    e.printStackTrace();
+                                }
+
+                                if (addEvent) {
+                                    String status = registrationStatusMap.get(docSnap.getId());
+                                    ticketList.add(new Ticket(event, status != null ? status : "Registered"));
+                                }
                             }
                         }
+
                         Collections.sort(ticketList, (t1, t2) -> {
                             try {
-                                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
                                 Date date1 = sdf.parse(t1.getEvent().getDate());
                                 Date date2 = sdf.parse(t2.getEvent().getDate());
                                 return date2.compareTo(date1);
@@ -114,9 +168,21 @@ public class MyEventsFragment extends Fragment implements TicketAdapter.OnTicket
                                 return 0;
                             }
                         });
+
                         adapter.notifyDataSetChanged();
+                        progressBar.setVisibility(View.GONE);
+                        tvEmptyState.setVisibility(ticketList.isEmpty() ? View.VISIBLE : View.GONE);
                     });
                 });
+    }
+
+    @Override
+    public void onEventClick(Ticket ticket) {
+        FragmentManager fragmentManager = getParentFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.fragment_container, EventDetailsFragment.newInstance(ticket.getEvent().getEventId()));
+        fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.commit();
     }
 
     @Override
@@ -145,13 +211,22 @@ public class MyEventsFragment extends Fragment implements TicketAdapter.OnTicket
             return null;
         }).addOnSuccessListener(aVoid -> {
             Toast.makeText(getContext(), "Welcome! Checked in successfully.", Toast.LENGTH_SHORT).show();
-            loadMyTickets(); // Refresh the list
+            loadMyTickets("Ongoing"); // Refresh the list
         }).addOnFailureListener(e -> Toast.makeText(getContext(), "Failed to mark attendance.", Toast.LENGTH_SHORT).show());
     }
 
     @Override
     public void onRateEvent(Ticket ticket) {
         showRatingDialog(ticket.getEvent());
+    }
+
+    @Override
+    public void onOpenForum(Ticket ticket) {
+        FragmentManager fragmentManager = getParentFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.fragment_container, EventForumFragment.newInstance(ticket.getEvent().getEventId(), ticket.getEvent().getPlannerId(), false));
+        fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.commit();
     }
 
     private void showRatingDialog(Event event) {

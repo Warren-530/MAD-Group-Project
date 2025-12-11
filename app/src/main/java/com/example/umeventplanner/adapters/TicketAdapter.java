@@ -17,7 +17,12 @@ import com.example.umeventplanner.Event;
 import com.example.umeventplanner.R;
 import com.example.umeventplanner.Ticket;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class TicketAdapter extends RecyclerView.Adapter<TicketAdapter.TicketViewHolder> {
 
@@ -28,6 +33,8 @@ public class TicketAdapter extends RecyclerView.Adapter<TicketAdapter.TicketView
     public interface OnTicketActionListener {
         void onScanQr(Ticket ticket);
         void onRateEvent(Ticket ticket);
+        void onOpenForum(Ticket ticket);
+        void onEventClick(Ticket ticket);
     }
 
     public TicketAdapter(Context context, List<Ticket> ticketList, OnTicketActionListener listener) {
@@ -58,15 +65,53 @@ public class TicketAdapter extends RecyclerView.Adapter<TicketAdapter.TicketView
         String status = ticket.getRegistrationStatus();
         holder.tvStatus.setText(status);
 
+        // Determine if the event is in the past
+        boolean isPastEvent = false;
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+            Date eventDate = sdf.parse(event.getDate());
+
+            // Normalize today to midnight to compare dates only
+            Calendar c = Calendar.getInstance();
+            c.set(Calendar.HOUR_OF_DAY, 0);
+            c.set(Calendar.MINUTE, 0);
+            c.set(Calendar.SECOND, 0);
+            c.set(Calendar.MILLISECOND, 0);
+            Date today = c.getTime();
+
+            // If eventDate is before today (normalized), it's a past event
+            isPastEvent = eventDate.before(today);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        // Logic for the action button
         if ("Attended".equalsIgnoreCase(status)) {
             holder.tvStatus.setBackgroundColor(Color.parseColor("#4CAF50")); // Green
             holder.btnAction.setText("Rate Event");
+            holder.btnAction.setVisibility(View.VISIBLE);
             holder.btnAction.setOnClickListener(v -> listener.onRateEvent(ticket));
         } else { // Registered
-            holder.tvStatus.setBackgroundColor(Color.parseColor("#80000000")); // Default semi-transparent black
-            holder.btnAction.setText("Scan Check-in QR");
-            holder.btnAction.setOnClickListener(v -> listener.onScanQr(ticket));
+            holder.tvStatus.setBackgroundColor(Color.parseColor("#80000000"));
+            if (isPastEvent) {
+                // If it's a past event and the user didn't attend, hide the action button.
+                holder.btnAction.setVisibility(View.GONE);
+            } else {
+                // It's an ongoing/future event, show Check-in button.
+                holder.btnAction.setText("Check-in");
+                holder.btnAction.setVisibility(View.VISIBLE);
+                holder.btnAction.setOnClickListener(v -> listener.onScanQr(ticket));
+            }
         }
+
+        holder.btnForum.setOnClickListener(v -> listener.onOpenForum(ticket));
+
+        // Make the whole card clickable
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onEventClick(ticket);
+            }
+        });
     }
 
     @Override
@@ -77,7 +122,7 @@ public class TicketAdapter extends RecyclerView.Adapter<TicketAdapter.TicketView
     public static class TicketViewHolder extends RecyclerView.ViewHolder {
         ImageView ivBanner;
         TextView tvStatus, tvTitle, tvDateLocation;
-        Button btnAction;
+        Button btnAction, btnForum;
 
         public TicketViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -86,6 +131,7 @@ public class TicketAdapter extends RecyclerView.Adapter<TicketAdapter.TicketView
             tvTitle = itemView.findViewById(R.id.tvTitle);
             tvDateLocation = itemView.findViewById(R.id.tvDateLocation);
             btnAction = itemView.findViewById(R.id.btnAction);
+            btnForum = itemView.findViewById(R.id.btnForum);
         }
     }
 }

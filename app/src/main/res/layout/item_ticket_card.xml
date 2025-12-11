@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
-    app:cardCornerRadius="12dp"
-    app:cardElevation="4dp">
+    app:cardCornerRadius="8dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -14,11 +14,12 @@
         <ImageView
             android:id="@+id/ivBanner"
             android:layout_width="0dp"
-            android:layout_height="120dp"
+            android:layout_height="150dp"
             android:scaleType="centerCrop"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            tools:src="@tools:sample/backgrounds/scenic" />
 
         <TextView
             android:id="@+id/tvStatus"
@@ -27,12 +28,15 @@
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             android:background="#80000000"
-            android:fontFamily="@font/poppins_medium"
-            android:padding="4dp"
-            android:text="Registered"
+            android:paddingLeft="8dp"
+            android:paddingTop="4dp"
+            android:paddingRight="8dp"
+            android:paddingBottom="4dp"
             android:textColor="@android:color/white"
-            app:layout_constraintEnd_toEndOf="@id/ivBanner"
-            app:layout_constraintTop_toTopOf="@id/ivBanner" />
+            android:textSize="12sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Attended" />
 
         <TextView
             android:id="@+id/tvTitle"
@@ -42,34 +46,46 @@
             android:layout_marginTop="16dp"
             android:layout_marginEnd="16dp"
             android:textAppearance="@style/TextAppearance.AppCompat.Large"
-            android:textStyle="bold"
-            app:layout_constraintTop_toBottomOf="@id/ivBanner"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintTop_toBottomOf="@id/ivBanner"
+            tools:text="Event Title" />
 
         <TextView
             android:id="@+id/tvDateLocation"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:textAppearance="@style/TextAppearance.AppCompat.Small"
-            app:layout_constraintTop_toBottomOf="@id/tvTitle"
-            app:layout_constraintStart_toStartOf="@id/tvTitle"
-            app:layout_constraintEnd_toEndOf="@id/tvTitle" />
+            app:layout_constraintEnd_toEndOf="@+id/tvTitle"
+            app:layout_constraintStart_toStartOf="@+id/tvTitle"
+            app:layout_constraintTop_toBottomOf="@+id/tvTitle"
+            tools:text="01/01/2025 | Kuala Lumpur" />
 
         <Button
             android:id="@+id/btnAction"
-            android:layout_width="0dp"
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
-            android:layout_marginEnd="16dp"
             android:layout_marginBottom="16dp"
-            android:backgroundTint="@color/primary_darkgreen"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/btnForum"
+            app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvDateLocation" />
+            app:layout_constraintTop_toBottomOf="@+id/tvDateLocation"
+            tools:text="Scan Check-in QR" />
+
+        <Button
+            android:id="@+id/btnForum"
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Event Forum"
+            app:layout_constraintBottom_toBottomOf="@+id/btnAction"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/btnAction"
+            app:layout_constraintTop_toTopOf="@+id/btnAction" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

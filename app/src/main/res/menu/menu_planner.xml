@@ -13,6 +13,10 @@
         android:icon="@android:drawable/ic_menu_add"
         android:title="Create Event" />
     <item
+        android:id="@+id/nav_notifications"
+        android:icon="@android:drawable/ic_menu_myplaces"
+        android:title="Notifications" />
+    <item
         android:id="@+id/nav_forum"
         android:icon="@android:drawable/ic_menu_help"
         android:title="Forum" />

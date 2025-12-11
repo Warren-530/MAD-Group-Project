@@ -1,0 +1,6 @@
+<resources>
+    <string-array name="sort_options">
+        <item>Name</item>
+        <item>UID</item>
+    </string-array>
+</resources>
