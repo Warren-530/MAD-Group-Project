@@ -13,7 +13,10 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:title="Invite Guests" />
+            app:title="Invite Guests"
+            android:background="@color/primary_darkgreen"
+            app:titleTextAppearance="@style/ToolbarTitleTextAppearance"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"/>
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -40,9 +43,14 @@
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_invite"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="60dp"
             android:layout_gravity="end"
-            android:text="Invite" />
+            android:text="Invite"
+            android:fontFamily="@font/poppins_semibold"
+            android:textSize="16sp"
+            android:textColor="@android:color/white"
+            app:backgroundTint="@color/primary_darkgreen"
+            app:cornerRadius="10dp" />
 
     </LinearLayout>
 

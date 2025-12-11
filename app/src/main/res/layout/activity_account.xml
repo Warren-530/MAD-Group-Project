@@ -6,26 +6,26 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
 
-    android:background="@drawable/bottom_gradient"
+    android:background="@drawable/ic_background_color"
     tools:context=".AccountActivity">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:theme="@style/Theme.UMEventPlanner.AppBarOverlay">
+        android:padding="15dp"
+        android:background="@android:color/white">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="@color/white"
-            app:popupTheme="@style/Theme.UMEventPlanner.PopupOverlay" >
+            android:background="@android:color/white">
 
             <ImageView
                 android:id="@+id/iv_backButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/back_icon"
+                android:src="@drawable/ic_back"
                 android:padding="4dp"
                 android:layout_gravity="start"
                 app:tint="@color/primary_darkgreen" />
@@ -37,7 +37,7 @@
                 android:fontFamily="@font/poppins_semibold"
                 android:text="Account Details"
                 android:textColor="@color/primary_darkgreen"
-                android:textSize="20sp" />
+                android:textSize="22sp" />
         </androidx.appcompat.widget.Toolbar>
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -54,7 +54,7 @@
             android:id="@+id/etName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/poppins_medium" />
+            android:fontFamily="@font/poppins_semibold" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
@@ -70,7 +70,7 @@
             android:id="@+id/etYear"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/poppins_medium" />
+            android:fontFamily="@font/poppins_semibold" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
@@ -86,7 +86,7 @@
             android:id="@+id/etCourse"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/poppins_medium" />
+            android:fontFamily="@font/poppins_semibold" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
@@ -102,7 +102,7 @@
             android:id="@+id/etMatricNumber"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/poppins_medium" />
+            android:fontFamily="@font/poppins_semibold" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.switchmaterial.SwitchMaterial
@@ -112,7 +112,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="24dp"
         android:layout_marginEnd="16dp"
-        android:fontFamily="@font/poppins_medium"
+        android:fontFamily="@font/poppins_semibold"
         android:text="Enable Planner Mode"
         android:textColor="@color/primary_darkgreen"
         android:textSize="16sp" />
@@ -120,11 +120,13 @@
     <Button
         android:id="@+id/btnUpdate"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="60dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="32dp"
         android:layout_marginEnd="16dp"
         android:text="Update Profile"
+        android:fontFamily="@font/poppins_semibold"
+        android:textSize="16sp"
         android:textColor="@android:color/white"
         app:backgroundTint="@color/primary_darkgreen"
         app:cornerRadius="10dp" />

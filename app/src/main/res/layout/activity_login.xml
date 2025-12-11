@@ -7,14 +7,14 @@
     android:orientation="vertical"
     android:padding="24dp"
     android:gravity="center"
-    android:background="@drawable/bottom_gradient"
+    android:background="@drawable/ic_background_color"
     tools:context=".LoginActivity">
 
     <ImageView
-        android:layout_width="102dp"
-        android:layout_height="100dp"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
         android:layout_marginBottom="30dp"
-        android:src="@drawable/smartplan_logo" />
+        android:src="@drawable/ic_smartplan_logo" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -23,7 +23,7 @@
         android:fontFamily="@font/poppins_medium"
         android:text="Welcome Back"
         android:textColor="@color/primary_darkgreen"
-        android:textSize="28sp"
+        android:textSize="30sp"
         android:textStyle="bold" />
 
     <TextView
